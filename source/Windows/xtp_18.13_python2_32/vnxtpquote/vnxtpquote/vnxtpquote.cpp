@@ -1315,20 +1315,32 @@ int QuoteApi::exit()
 
 string QuoteApi::getTradingDay()
 {
-	string day = this->api->GetTradingDay();
-	return day;
+	string ret ="";
+	const char* p = this->api->GetTradingDay();
+	if (p == NULL)
+		ret = "NULL";
+	else
+		ret = p;
+	return ret;
 };
 
 string QuoteApi::getApiVersion()
 {
-	string version = this->api->GetApiVersion();
-	return version;
+	string ret ="";
+	const char* p = this->api->GetApiVersion();
+	if (p == NULL)
+		ret = "NULL";
+	else
+		ret = p;
+	return ret;
 };
 
 dict QuoteApi::getApiLastError()
 {
 	XTPRI *error = this->api->GetApiLastError();
 	dict err;
+	if(error == NULL)
+		return err;
 
 	err["error_id"] = error->error_id;
 	err["error_msg"] = error->error_msg;

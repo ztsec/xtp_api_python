@@ -1227,14 +1227,21 @@ int TraderApi::exit()
 
 string TraderApi::getTradingDay()
 {
-	string day = this->api->GetTradingDay();
-	return day;
+	string ret ="";
+	const char* p = this->api->GetTradingDay();
+	if (p == NULL)
+		ret = "NULL";
+	else
+		ret = p;
+	return ret;
 };
 
 dict TraderApi::getApiLastError()
 {
 	dict d;
 	XTPRI *error = this->api->GetApiLastError();
+	if(error == NULL)
+		return d;
 
 	d["error_id"] = error->error_id;
 	d["error_msg"] = error->error_msg;
@@ -1244,8 +1251,13 @@ dict TraderApi::getApiLastError()
 
 string TraderApi::getApiVersion()
 {
-	string version = this->api->GetApiVersion();
-	return version;
+	string ret ="";
+	const char* p = this->api->GetApiVersion();
+	if (p == NULL)
+		ret = "NULL";
+	else
+		ret = p;
+	return ret;
 }
 
 uint8_t TraderApi::getClientIDByXTPID(uint64_t orderid)
@@ -1255,8 +1267,14 @@ uint8_t TraderApi::getClientIDByXTPID(uint64_t orderid)
 
 string TraderApi::getAccountByXTPID(uint64_t orderid)
 {
-	string account = this->api->GetAccountByXTPID(orderid);
-	return account;
+	string ret ="";
+	const char* p = this->api->GetAccountByXTPID(orderid);
+	if (p == NULL)
+		ret = "NULL";
+	else
+		ret = p;
+	
+	return ret;
 }
 
 void TraderApi::subscribePublicTopic(int type)
