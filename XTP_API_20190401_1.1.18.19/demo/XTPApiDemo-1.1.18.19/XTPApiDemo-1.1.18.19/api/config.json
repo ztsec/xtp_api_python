@@ -1,0 +1,42 @@
+{
+  "client_id": 1,
+  "path": "D:\\test\\",
+  "path_linux": "/root/log/",
+  "account_key":"xxxxxxxx",
+  "account": [
+    {
+      "user": "tradeusername",
+      "password": "tradepw"
+    }
+  ],
+  "trade_port": 6001,
+  "trade_ip": "120.27.164.69",
+  "auto_save": true,
+  "resume_type": 2,
+  "out_count": 1,
+  "order": [
+    {
+      "instrument_id": "600090",
+      "exchange": 2,
+      "price": 7.0,
+      "quantity": 200,
+      "side": 1,
+      "price_type": 1,
+	  "business_type":0,
+	  "position_effect":0
+    }
+  ],
+  "quote_ip": "120.27.164.138",
+  "quote_port": 6002,
+  "quote_user": "quoteusername",
+  "quote_password": "quotepw",
+  "quote_ticker": {
+    "instrument": [
+      "600120"
+    ],
+    "exchange": 1
+  },
+  "hb_interval":15,
+  "quote_buffer_size":128,
+  "quote_protocol":1
+}
