@@ -435,8 +435,8 @@ class TestApi(TraderApi):
 if __name__ == '__main__':
     ip = '120.27.164.69'
     port = 6001
-    user = '15006594'
-    password = 'SitHAKln'
+    user = 'username'
+    password = 'password'
     reqid = 0
     
     #创建TraderApi
@@ -461,7 +461,7 @@ if __name__ == '__main__':
     #设置软件开发Key
     #@param key 用户开发软件Key
     #@remark 此函数必须在Login之前调用
-    setSoftwareKey = api.setSoftwareKey("b8aa7173bba3470e390d787219b2112e")
+    setSoftwareKey = api.setSoftwareKey("key")
     printFuncName('setSoftwareKey', setSoftwareKey)
 
     #设置软件开发版本号

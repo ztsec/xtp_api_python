@@ -392,8 +392,8 @@ if __name__ == '__main__':
 
     ip = '120.27.164.138'
     port = 6002
-    user = '15006594'
-    password = 'SitHAKln'
+    user = 'username'
+    password = 'password'
     #创建QuoteApi
     #@param client_id （必须输入）用于区分同一用户的不同客户端，由用户自定义
     #@param save_file_path （必须输入）存贮订阅信息文件的目录，请设定一个有可写权限的真实存在的路径
