@@ -145,6 +145,48 @@ class TestApi(TraderApi):
         print("error['error_id']:",error['error_id'])#
         print("error['error_msg']:",error['error_msg'])#
 
+    #分页请求查询报单响应
+    #@param data 查询到的一个报单
+    #@param req_count 分页请求的最大数量
+    #@param order_sequence 分页请求的当前回报数量
+    #@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+    #@param reqid 此消息响应函数对应的请求ID
+    #@param last 此消息响应函数是否为reqid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+    #@param session 资金账户对应的session，登录时得到
+    #@remark 当order_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果order_sequence等于req_count，那么表示还有报单，可以进行下一次分页查询，如果不等，表示所有报单已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+    def onQueryOrderByPage(self, data, req_count,order_sequence,query_reference, reqid, last,session):
+        """"""
+        printFuncName('onQueryOrderByPage', data, req_count,order_sequence,query_reference, reqid, last,session)
+        print("data['cancel_time']:",data['cancel_time'])#撤销时间
+        print("data['update_time']:",data['update_time'])#最后修改时间
+        print("data['order_cancel_xtp_id']:",data['order_cancel_xtp_id'])#撤单在XTP系统中的id，在XTP系统中唯一
+        print("data['order_client_id']:",data['order_client_id'])#报单引用
+        print("data['trade_amount']:",data['trade_amount'])#成交金额
+        print("data['price_type']:",data['price_type'])#报单价格条件
+        print("data['order_type']:",data['order_type'])#报单类型
+        print("data['price']:",data['price'])#价格
+        print("data['qty_traded']:",data['qty_traded'])#今成交数量，为此订单累计成交数量
+        print("data['qty_left']:",data['qty_left'])#剩余数量，当撤单成功时，表示撤单数量
+        print("data['order_local_id']:",data['order_local_id'])#本地报单编号 OMS生成的单号，不等同于order_xtp_id，为服务器传到报盘的单号
+        print("data['side']:",data['side'])#买卖方向
+        print("data['position_effect']:",data['position_effect'])#开平标志
+        print("data['reserved1']:",data['reserved1'])#预留字段1
+        print("data['reserved2']:",data['reserved2'])#预留字段2
+        print("data['order_submit_status']:",data['order_submit_status'])#报单提交状态，OMS内部使用，用户无需关心
+        print("data['insert_time']:",data['insert_time'])#委托时间，格式为YYYYMMDDHHMMSSsss
+        print("data['order_xtp_id']:",data['order_xtp_id'])#XTP系统订单ID，在XTP系统中唯一
+        print("data['order_status']:",data['order_status'])#报单状态，订单响应中没有部分成交状态的推送，在查询订单结果中，会有部分成交状态
+        print("data['ticker']:",data['ticker'])#合约代码
+        print("data['order_cancel_client_id']:",data['order_cancel_client_id'])#报单操作引用，用户自定义（暂未使用）
+        print("data['market']:",data['market'])#交易市场
+        print("data['quantity']:",data['quantity'])#数量，此订单的报单数量
+        print("req_count:",req_count)#分页请求的最大数量
+        print("order_sequence:",order_sequence)#分页请求的当前回报数量
+        print("query_reference:",query_reference)#当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+        print("reqid:",reqid)#此消息响应函数对应的请求ID
+        print("last:",last)#此消息响应函数是否为reqid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+        print("session:",session)#资金账户对应的session，登录时得到
+
     #请求查询成交响应
     #@param data 查询到的一个成交回报
     #@param error 查询成交回报发生错误时返回的错误信息，当error为空，或者error.error_id为0时，表明没有错误
@@ -176,6 +218,44 @@ class TestApi(TraderApi):
         print("data['business_type']:",data['business_type'])#业务类型
         print("error['error_id']:",error['error_id'])
         print("error['error_msg']:",error['error_msg'])
+
+    #分页请求查询成交响应
+    #@param data 查询到的一个成交回报
+    #@param req_count 分页请求的最大数量
+    #@param trade_sequence 分页请求的当前回报数量
+    #@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+    #@param reqid 此消息响应函数对应的请求ID
+    #@param last 此消息响应函数是否为reqid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+    #@param session 资金账户对应的session，登录时得到
+    #@remark 当trade_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果trade_sequence等于req_count，那么表示还有回报，可以进行下一次分页查询，如果不等，表示所有回报已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+    def onQueryTradeByPage(self, data, req_count, trade_sequence, query_reference, reqid, last,session):
+        """"""
+        printFuncName('onQueryTradeByPage', data, req_count, trade_sequence, query_reference, reqid, last,session)
+        print("data['branch_pbu']:",data['branch_pbu'])#交易所交易员代码
+        print("data['trade_amount']:",data['trade_amount'])#成交金额，此次成交的总金额 = price*quantity
+        print("data['exec_id']:",data['exec_id'])#成交编号，深交所唯一，上交所每笔交易唯一，当发现2笔成交回报拥有相同的exec_id，则可以认为此笔交易自成交
+        print("data['trade_type']:",data['trade_type'])#成交类型  --成交回报中的执行类型
+        print("data['order_client_id']:",data['order_client_id'])#报单引用
+        print("data['order_exch_id']:",data['order_exch_id'])#报单编号 --交易所单号，上交所为空，深交所有此字段
+        print("data['price']:",data['price'])#价格，此次成交的价格
+        print("data['report_index']:",data['report_index'])#成交序号 --回报记录号，每个交易所唯一,report_index+market字段可以组成唯一标识表示成交回报
+        print("data['local_order_id']:",data['local_order_id'])#订单号，引入XTPID后，该字段实际和order_xtp_id重复。接口中暂时保留
+        print("data['trade_time']:",data['trade_time'])#成交时间，格式为YYYYMMDDHHMMSSsss
+        print("data['order_xtp_id']:",data['order_xtp_id'])#XTP系统订单ID，此成交回报相关的订单ID，在XTP系统中唯一
+        print("data['ticker']:",data['ticker'])#合约代码
+        print("data['side']:",data['side'])#买卖方向
+        print("data['position_effect']:",data['position_effect'])#开平标志
+        print("data['reserved1']:",data['reserved1'])#预留字段
+        print("data['reserved2']:",data['reserved2'])#预留字段
+        print("data['market']:",data['market'])#交易市场
+        print("data['quantity']:",data['quantity'])#数量，此次成交的数量，不是累计数量
+        print("data['business_type']:",data['business_type'])#业务类型
+        print("req_count:",req_count)#分页请求的最大数量
+        print("trade_sequence:",trade_sequence)#分页请求的当前回报数量
+        print("query_reference:",query_reference)#当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+        print("reqid:",reqid)#此消息响应函数对应的请求ID
+        print("last:",last)#此消息响应函数是否为reqid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+        print("session:",session)#资金账户对应的session，登录时得到
 
     #请求查询投资者持仓响应
     #@param data 查询到的一只股票的持仓情况
@@ -435,18 +515,18 @@ class TestApi(TraderApi):
 if __name__ == '__main__':
     ip = '120.27.164.69'
     port = 6001
-    user = 'username'
+    user = 'user'
     password = 'password'
     reqid = 0
     
     #创建TraderApi
     #@param client_id （必须输入）客户端id，用于区分同一用户的不同客户端，由用户自定义
     #@param save_file_path （必须输入）存贮订阅信息文件的目录，请设定一个真实存在的有可写权限的路径
-    #@param log_level 日志输出级别
+    #@param log_level 日志输出级别“0”代表严重错误级别,“1”代表错误级别,“2”代表警告级别,“3”代表info级别,“4”代表debug级别，“5”代表trace级别
     #@return 创建出的UserApi
     #@remark 如果一个账户需要在多个客户端登录，请使用不同的client_id，系统允许一个账户同时登录多个客户端，但是对于同一账户，相同的client_id只能保持一个session连接，后面的登录在前一个session存续期间，无法连接。系统不支持过夜，请确保每天开盘前重新启动
     api = TestApi()
-    createTraderApi = api.createTraderApi(1, os.getcwd())
+    createTraderApi = api.createTraderApi(1, os.getcwd(),4)
     printFuncName('createTraderApi', createTraderApi)
 
     #订阅公共流。
@@ -461,7 +541,7 @@ if __name__ == '__main__':
     #设置软件开发Key
     #@param key 用户开发软件Key
     #@remark 此函数必须在Login之前调用
-    setSoftwareKey = api.setSoftwareKey("key")
+    setSoftwareKey = api.setSoftwareKey("b8aa7173bba3470e390d787219b2112e")
     printFuncName('setSoftwareKey', setSoftwareKey)
 
     #设置软件开发版本号
@@ -480,6 +560,13 @@ if __name__ == '__main__':
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api可支持多个账户连接，但是同一个账户同一个client_id只能有一个session连接，后面的登录在前一个session存续期间，无法连接
     session = api.login(ip, port, user, password, 1)
     printFuncName('login', session)
+
+    #服务器是否重启过
+    #@return “true”表示重启过，“false”表示没有重启过
+    #@param session_id 资金账户对应的session_id,登录时得到
+    #@remark  此函数必须在Login之后调用
+    retIsServerRestart = api.isServerRestart(session)
+    printFuncName('isServerRestart', retIsServerRestart)
 
     #获取当前交易日
     #return 获取到的交易日
@@ -528,6 +615,7 @@ if __name__ == '__main__':
     order['price_type'] = 1  # 限价单
     order['side'] = 1  # 买
     order['position_effect'] = 1  # 开仓
+    order['business_type'] = 0  # 普通股票业务（股票买卖，ETF买卖等）
 
     retInsertOrder = api.insertOrder(order, session)
     printFuncName('insertOrder', retInsertOrder)
@@ -565,6 +653,21 @@ if __name__ == '__main__':
     retQueryOrders = api.queryOrders(queryOrdersInfo, session, reqid)
     printFuncName('queryOrders',retQueryOrders)
 
+    #分页请求查询报单
+    #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+    #@param query_param 需要分页查询订单的条件，如果第一次查询，那么query_param.reference填0
+    #@param session_id 资金账户对应的session_id，登录时得到
+    #@param request_id 用于用户定位查询响应的ID，由用户自定义
+    #@remark 该方法支持分页查询，注意用户需要记录下最后一笔查询结果的reference以便用户下次查询使用    sleep(1)
+    queryOrderByPageReq = {}
+    queryOrderByPageReq['req_count'] = 10 #需要查询的成交回报条数
+    queryOrderByPageReq['reference'] = 0 #上一次收到的查询订单结果中带回来的索引，如果是从头查询，请置0
+    queryOrderByPageReq['reserved'] = 0 #保留字段
+    sleep(1)
+    reqid += 1
+    retQueryOrdersByPage = api.queryOrdersByPage(queryOrderByPageReq, session, reqid)
+    printFuncName('queryOrdersByPage', retQueryOrdersByPage)
+
     #根据委托编号请求查询相关成交
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
     #@param order_xtp_id 需要查询的委托编号，即InsertOrder()成功时返回的order_xtp_id
@@ -590,6 +693,22 @@ if __name__ == '__main__':
     reqid += 1
     retQueryTrades = api.queryTrades(queryTradesInfo, session, reqid)
     printFuncName('queryTrades',retQueryTrades)
+
+    sleep(1)
+    #分页请求查询成交回报
+    #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+    #@param query_param 需要分页查询成交回报的条件，如果第一次查询，那么reference填0
+    #@param session_id 资金账户对应的session_id，登录时得到
+    #@param request_id 用于用户定位查询响应的ID，由用户自定义
+    #@remark 该方法支持分页查询，注意用户需要记录下最后一笔查询结果的reference以便用户下次查询使用
+    queryTraderByPageReq = {}
+    queryTraderByPageReq['req_count'] = 10 #需要查询的成交回报条数
+    queryTraderByPageReq['reference'] = 0 #上一次收到的查询成交回报结果中带回来的索引，如果是从头查询，请置0
+    queryTraderByPageReq['reserved'] = 0 #保留字段
+    sleep(1)
+    reqid += 1
+    retQueryTradesByPage = api.queryTradesByPage(queryTraderByPageReq, session, reqid)
+    printFuncName('queryTradesByPage', retQueryTradesByPage)
 
     sleep(1)
     #请求查询投资者持仓

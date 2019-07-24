@@ -246,6 +246,7 @@ typedef enum XTP_TICKER_TYPE
 	XTP_TICKER_TYPE_FUND,                 ///<基金
 	XTP_TICKER_TYPE_BOND,                 ///<债券
 	XTP_TICKER_TYPE_OPTION,               ///<期权
+    XTP_TICKER_TYPE_TECH_STOCK,           ///<科创板股票（上海）
 	XTP_TICKER_TYPE_UNKNOWN               ///<未知类型
 	
 }XTP_TICKER_TYPE;

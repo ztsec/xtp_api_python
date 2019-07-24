@@ -1345,9 +1345,9 @@ void QuoteApi::processUnSubscribeAllOptionTickByTick(Task *task)
 ///Ö÷¶¯º¯Êý
 ///-------------------------------------------------------------------------------------
 
-void QuoteApi::createQuoteApi(int clientid, string path)
+void QuoteApi::createQuoteApi(int clientid, string path, int log_level)
 {
-	this->api = XTP::API::QuoteApi::CreateQuoteApi(clientid, path.c_str());
+	this->api = XTP::API::QuoteApi::CreateQuoteApi(clientid, path.c_str(),(XTP_LOG_LEVEL)log_level);
 	this->api->RegisterSpi(this);
 };
 

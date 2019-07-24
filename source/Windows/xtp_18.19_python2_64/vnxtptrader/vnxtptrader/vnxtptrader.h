@@ -47,7 +47,8 @@ using namespace boost;
 #define ONQUERYIPOQUOTAINFO 16
 
 #define ONQUERYOPTIONAUCTIONINFO 17
-
+#define ONQUERYORDERBYPAGE 18
+#define ONQUERYTRADEBYPAGE 19
 ///-------------------------------------------------------------------------------------
 ///API中的部分组件
 ///-------------------------------------------------------------------------------------
@@ -83,6 +84,9 @@ struct Task
 	int task_id;		//请求id
 	bool task_last;		//是否为最后返回
 	uint64_t addtional_int;		//补充整数字段
+	int64_t addtional_int_two;		//补充整数字段
+	int64_t addtional_int_three;		//补充整数字段
+	int64_t addtional_int_four;		//补充整数字段
 };
 
 
@@ -218,6 +222,18 @@ public:
 	///@remark 由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id) ;
 
+	///分页请求查询报单响应
+	///@param order_info 查询到的一个报单
+	///@param req_count 分页请求的最大数量
+	///@param order_sequence 分页请求的当前回报数量
+	///@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+	///@param request_id 此消息响应函数对应的请求ID
+	///@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@param session_id 资金账户对应的session_id，登录时得到
+	///@remark 当order_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果order_sequence等于req_count，那么表示还有报单，可以进行下一次分页查询，如果不等，表示所有报单已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+	virtual void OnQueryOrderByPage(XTPQueryOrderRsp *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id);
+
+
 	///请求查询成交响应
 	///@param trade_info 查询到的一个成交回报
 	///@param error_info 查询成交回报发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
@@ -225,6 +241,17 @@ public:
 	///@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
 	///@remark 由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id) ;
+
+	///分页请求查询成交响应
+	///@param trade_info 查询到的一个成交信息
+	///@param req_count 分页请求的最大数量
+	///@param trade_sequence 分页请求的当前回报数量
+	///@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+	///@param request_id 此消息响应函数对应的请求ID
+	///@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@param session_id 资金账户对应的session_id，登录时得到
+	///@remark 当trade_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果trade_sequence等于req_count，那么表示还有回报，可以进行下一次分页查询，如果不等，表示所有回报已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+	virtual void OnQueryTradeByPage(XTPQueryTradeRsp *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id);
 
 	///请求查询投资者持仓响应
 	///@param position 查询到的一只股票的持仓情况
@@ -327,7 +354,11 @@ public:
 
 	void processQueryOrder(Task *task);
 
+	void processQueryOrderByPage(Task *task);
+
 	void processQueryTrade(Task *task);
+
+	void processQueryTradeByPage(Task *task);
 
 	void processQueryPosition(Task *task);
 
@@ -389,11 +420,15 @@ public:
 
 	virtual void onQueryOptionAuctionInfo(dict data, dict error, int reqid, bool last, uint64_t session) {};
 
+	virtual void onQueryOrderByPage(dict data, int64_t req_count, int64_t order_sequence, int64_t query_reference, int reqid, bool last, uint64_t session) {};
+	
+	virtual void onQueryTradeByPage(dict data, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int reqid, bool last, uint64_t session) {};
+
 	//-------------------------------------------------------------------------------------
 	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	void createTraderApi(uint8_t clientid, string path);
+	void createTraderApi(uint8_t clientid, string path, int log_level = XTP_LOG_LEVEL_DEBUG);
 
 	void release();
 
@@ -452,4 +487,10 @@ public:
 	int queryIPOQuotaInfo(uint64_t sessionid, int reqid);
 
 	int queryOptionAuctionInfo(dict req,uint64_t session_id, int request_id);
+
+	int queryOrdersByPage(dict req, uint64_t sessionid, int reqid);
+
+	int queryTradesByPage(dict req, uint64_t sessionid, int reqid);
+
+	bool isServerRestart(uint64_t session_id);
 };

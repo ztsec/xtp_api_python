@@ -392,16 +392,16 @@ if __name__ == '__main__':
 
     ip = '120.27.164.138'
     port = 6002
-    user = 'username'
+    user = 'user'
     password = 'password'
     #创建QuoteApi
     #@param client_id （必须输入）用于区分同一用户的不同客户端，由用户自定义
     #@param save_file_path （必须输入）存贮订阅信息文件的目录，请设定一个有可写权限的真实存在的路径
-    #@param log_level 日志输出级别
+    #@param log_level 日志输出级别 “0”代表严重错误级别,“1”代表错误级别,“2”代表警告级别,“3”代表info级别,“4”代表debug级别，“5”代表trace级别
     #@return 创建出的UserApi
     #@remark 如果一个账户需要在多个客户端登录，请使用不同的client_id，系统允许一个账户同时登录多个客户端，但是对于同一账户，相同的client_id只能保持一个session连接，后面的登录在前一个session存续期间，无法连接
     api = TestApi()
-    createQuoteAp = api.createQuoteApi(1, os.getcwd())
+    createQuoteAp = api.createQuoteApi(1, os.getcwd(),4)
     printFuncName("createQuoteAp", createQuoteAp)
 
     #用户登录请求

@@ -464,7 +464,7 @@ public:
 	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	void createQuoteApi(int clientid, string path);
+	void createQuoteApi(int clientid, string path, int log_level = XTP_LOG_LEVEL_DEBUG);
 
 	void release();
 

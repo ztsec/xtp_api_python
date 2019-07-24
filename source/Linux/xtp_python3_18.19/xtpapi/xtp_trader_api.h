@@ -78,6 +78,17 @@ namespace XTP {
 			///@remark 由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。此对应的请求函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
 			virtual void OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id) {};
 
+			///分页请求查询报单响应
+			///@param order_info 查询到的一个报单
+			///@param req_count 分页请求的最大数量
+			///@param order_sequence 分页请求的当前回报数量
+			///@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+			///@param request_id 此消息响应函数对应的请求ID
+			///@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+			///@param session_id 资金账户对应的session_id，登录时得到
+			///@remark 当order_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果order_sequence等于req_count，那么表示还有报单，可以进行下一次分页查询，如果不等，表示所有报单已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+			virtual void OnQueryOrderByPage(XTPQueryOrderRsp *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id) {};
+
 			///请求查询成交响应
 			///@param trade_info 查询到的一个成交回报
 			///@param error_info 查询成交回报发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
@@ -86,6 +97,17 @@ namespace XTP {
 			///@param session_id 资金账户对应的session_id，登录时得到
 			///@remark 由于支持分时段查询，一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。此对应的请求函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
 			virtual void OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id) {};
+
+			///分页请求查询成交响应
+			///@param trade_info 查询到的一个成交信息
+			///@param req_count 分页请求的最大数量
+			///@param trade_sequence 分页请求的当前回报数量
+			///@param query_reference 当前报单信息所对应的查询索引，需要记录下来，在进行下一次分页查询的时候需要用到
+			///@param request_id 此消息响应函数对应的请求ID
+			///@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+			///@param session_id 资金账户对应的session_id，登录时得到
+			///@remark 当trade_sequence为0，表明当次查询没有查到任何记录，当is_last为true时，如果trade_sequence等于req_count，那么表示还有回报，可以进行下一次分页查询，如果不等，表示所有回报已经查询完毕。一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
+			virtual void OnQueryTradeByPage(XTPQueryTradeRsp *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id) {};
 
 			///请求查询投资者持仓响应
 			///@param position 查询到的一只股票的持仓情况
@@ -280,6 +302,12 @@ namespace XTP {
 			///@param session_id 资金账户对应的session_id,登录时得到
 			virtual int Logout(uint64_t session_id) = 0;
 
+			///服务器是否重启过
+			///@return “true”表示重启过，“false”表示没有重启过
+			///@param session_id 资金账户对应的session_id,登录时得到
+			///@remark 此函数必须在Login之后调用
+			virtual bool IsServerRestart(uint64_t session_id) = 0;
+
 			///报单录入请求
 			///@return 报单在XTP系统中的ID,如果为‘0’表示报单发送失败，此时用户可以调用GetApiLastError()来获取错误代码，非“0”表示报单发送成功，用户需要记录下返回的order_xtp_id，它保证一个交易日内唯一，不同的交易日不保证唯一性
 			///@param order 报单录入信息，其中order.order_client_id字段是用户自定义字段，用户输入什么值，订单响应OnOrderEvent()返回时就会带回什么值，类似于备注，方便用户自己定位订单。当然，如果你什么都不填，也是可以的。order.order_xtp_id字段无需用户填写，order.ticker必须不带空格，以'\0'结尾
@@ -309,6 +337,14 @@ namespace XTP {
 			///@remark 该方法支持分时段查询，如果股票代码为空，则默认查询时间段内的所有报单，否则查询时间段内所有跟股票代码相关的报单，此函数查询出的结果可能对应多个查询结果响应。此函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
 			virtual int QueryOrders(const XTPQueryOrderReq *query_param, uint64_t session_id, int request_id) = 0;
 
+			///分页请求查询报单
+			///@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+			///@param query_param 需要分页查询订单的条件，如果第一次查询，那么query_param.reference填0
+			///@param session_id 资金账户对应的session_id，登录时得到
+			///@param request_id 用于用户定位查询响应的ID，由用户自定义
+			///@remark 该方法支持分页查询，注意用户需要记录下最后一笔查询结果的reference以便用户下次查询使用
+			virtual int QueryOrdersByPage(const XTPQueryOrderByPageReq *query_param, uint64_t session_id, int request_id) = 0;
+
 			///根据委托编号请求查询相关成交
 			///@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
 			///@param order_xtp_id 需要查询的委托编号，即InsertOrder()成功时返回的order_xtp_id
@@ -324,6 +360,14 @@ namespace XTP {
 			///@param request_id 用于用户定位查询响应的ID，由用户自定义
 			///@remark 该方法支持分时段查询，如果股票代码为空，则默认查询时间段内的所有成交回报，否则查询时间段内所有跟股票代码相关的成交回报，此函数查询出的结果可能对应多个查询结果响应。此函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
 			virtual int QueryTrades(XTPQueryTraderReq *query_param, uint64_t session_id, int request_id) = 0;
+
+			///分页请求查询成交回报
+			///@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+			///@param query_param 需要分页查询成交回报的条件，如果第一次查询，那么reference填0
+			///@param session_id 资金账户对应的session_id，登录时得到
+			///@param request_id 用于用户定位查询响应的ID，由用户自定义
+			///@remark 该方法支持分页查询，注意用户需要记录下最后一笔查询结果的reference以便用户下次查询使用
+			virtual int QueryTradesByPage(const XTPQueryTraderByPageReq *query_param, uint64_t session_id, int request_id) = 0;
 
 			///请求查询投资者持仓
 			///@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码

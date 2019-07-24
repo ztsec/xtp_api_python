@@ -227,6 +227,27 @@ void TraderApi::OnQueryOrder(XTPQueryOrderRsp *order_info, XTPRI *error_info, in
 	this->task_queue.push(task);
 };
 
+void TraderApi::OnQueryOrderByPage(XTPQueryOrderRsp *order_info, int64_t req_count, int64_t order_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)
+{
+	Task* task = new Task();
+	task->task_name = ONQUERYORDERBYPAGE;
+
+	if (order_info)
+	{
+		XTPQueryOrderRsp *task_data = new XTPQueryOrderRsp();
+		*task_data = *order_info;
+		task->task_data = task_data;
+	}
+
+	task->addtional_int_two = req_count;
+	task->addtional_int_three = order_sequence;
+	task->addtional_int_four = query_reference;
+	task->task_id = request_id;
+	task->task_last = is_last;
+	task->addtional_int = session_id;
+	this->task_queue.push(task);
+};
+
 void TraderApi::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
 {
 	Task* task = new Task();
@@ -251,6 +272,28 @@ void TraderApi::OnQueryTrade(XTPQueryTradeRsp *trade_info, XTPRI *error_info, in
 	task->addtional_int = session_id;
 	this->task_queue.push(task);
 };
+
+void TraderApi::OnQueryTradeByPage(XTPQueryTradeRsp *trade_info, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int request_id, bool is_last, uint64_t session_id)
+{
+	Task* task = new Task();
+	task->task_name = ONQUERYTRADEBYPAGE;
+
+	if (trade_info)
+	{
+		XTPQueryTradeRsp *task_data = new XTPQueryTradeRsp();
+		*task_data = *trade_info;
+		task->task_data = task_data;
+	}
+
+	task->addtional_int_two = req_count;
+	task->addtional_int_three = trade_sequence;
+	task->addtional_int_four = query_reference;
+	task->task_id = request_id;
+	task->task_last = is_last;
+	task->addtional_int = session_id;
+	this->task_queue.push(task);
+};
+
 
 void TraderApi::OnQueryPosition(XTPQueryStkPositionRsp *position, XTPRI *error_info, int request_id, bool is_last, uint64_t session_id)
 {
@@ -548,9 +591,21 @@ void TraderApi::processTask()
 				break;
 			}
 
+			case ONQUERYORDERBYPAGE:
+			{
+				this->processQueryOrderByPage(task);
+				break;
+			}
+
 			case ONQUERYTRADE:
 			{
 				this->processQueryTrade(task);
+				break;
+			}
+
+			case ONQUERYTRADEBYPAGE:
+			{
+				this->processQueryTradeByPage(task);
 				break;
 			}
 
@@ -794,6 +849,47 @@ void TraderApi::processQueryOrder(Task *task)
 	delete task;
 };
 
+void TraderApi::processQueryOrderByPage(Task *task)
+{
+	PyLock lock;
+	dict data;
+	if (task->task_data)
+	{
+		XTPQueryOrderRsp *task_data = (XTPQueryOrderRsp*)task->task_data;
+		data["cancel_time"] = task_data->cancel_time;
+		data["update_time"] = task_data->update_time;
+		data["order_cancel_xtp_id"] = task_data->order_cancel_xtp_id;
+		data["order_client_id"] = task_data->order_client_id;
+		data["trade_amount"] = task_data->trade_amount;
+		data["price_type"] = (int)task_data->price_type;
+		data["order_type"] = task_data->order_type;
+		data["price"] = task_data->price;
+		data["qty_traded"] = task_data->qty_traded;
+		data["qty_left"] = task_data->qty_left;
+		data["order_local_id"] = task_data->order_local_id;
+		data["side"] = (int)task_data->side;
+		data["position_effect"] = (int)task_data->position_effect;
+		data["reserved1"] = (int)task_data->reserved1;
+		data["reserved2"] = (int)task_data->reserved2;
+		data["order_submit_status"] = (int)task_data->order_submit_status;
+		data["insert_time"] = task_data->insert_time;
+		data["order_xtp_id"] = task_data->order_xtp_id;
+		data["order_status"] = (int)task_data->order_status;
+		data["ticker"] = task_data->ticker;
+		data["order_cancel_client_id"] = task_data->order_cancel_client_id;
+		data["market"] = (int)task_data->market;
+		data["quantity"] = task_data->quantity;
+		data["business_type"] = int(task_data->business_type);
+		delete task->task_data;
+	}
+
+
+
+	this->onQueryOrderByPage(data, task->addtional_int_two, task->addtional_int_three, task->addtional_int_four, task->task_id, task->task_last, task->addtional_int);
+	delete task;
+};
+
+
 void TraderApi::processQueryTrade(Task *task)
 {
 	PyLock lock;
@@ -835,6 +931,40 @@ void TraderApi::processQueryTrade(Task *task)
 	this->onQueryTrade(data, error, task->task_id, task->task_last, task->addtional_int);
 	delete task;
 };
+
+void TraderApi::processQueryTradeByPage(Task *task)
+{
+	PyLock lock;
+	dict data;
+	if (task->task_data)
+	{
+		XTPQueryTradeRsp *task_data = (XTPQueryTradeRsp*)task->task_data;
+		data["branch_pbu"] = task_data->branch_pbu;
+		data["trade_amount"] = task_data->trade_amount;
+		data["exec_id"] = task_data->exec_id;
+		data["trade_type"] = task_data->trade_type;
+		data["order_client_id"] = task_data->order_client_id;
+		data["order_exch_id"] = task_data->order_exch_id;
+		data["price"] = task_data->price;
+		data["report_index"] = task_data->report_index;
+		data["local_order_id"] = task_data->local_order_id;
+		data["trade_time"] = task_data->trade_time;
+		data["order_xtp_id"] = task_data->order_xtp_id;
+		data["ticker"] = task_data->ticker;
+		data["side"] = (int)task_data->side;
+		data["position_effect"] = (int)task_data->position_effect;
+		data["reserved1"] = (int)task_data->reserved1;
+		data["reserved2"] = (int)task_data->reserved2;
+		data["market"] = (int)task_data->market;
+		data["quantity"] = task_data->quantity;
+		data["business_type"] = int(task_data->business_type);
+		delete task->task_data;
+	}
+
+	this->onQueryTradeByPage(data, task->addtional_int_two, task->addtional_int_three, task->addtional_int_four, task->task_id, task->task_last, task->addtional_int);
+	delete task;
+};
+
 
 void TraderApi::processQueryPosition(Task *task)
 {
@@ -1205,9 +1335,9 @@ void TraderApi::processQueryOptionAuctionInfo(Task *task)
 ///主动函数
 ///-------------------------------------------------------------------------------------
 
-void TraderApi::createTraderApi(uint8_t clientid, string path)
+void TraderApi::createTraderApi(uint8_t clientid, string path, int log_level)
 {
-	this->api = XTP::API::TraderApi::CreateTraderApi(clientid, path.c_str());
+	this->api = XTP::API::TraderApi::CreateTraderApi(clientid, path.c_str(),(XTP_LOG_LEVEL)log_level);
 	this->api->RegisterSpi(this);
 };
 
@@ -1476,6 +1606,30 @@ int TraderApi::queryOptionAuctionInfo(dict req,uint64_t sessionid, int reqid)
 	return this->api->QueryOptionAuctionInfo(&myreq,sessionid, reqid);
 };
 
+int TraderApi::queryOrdersByPage(dict req, uint64_t sessionid, int reqid)
+{
+	XTPQueryOrderByPageReq myreq = XTPQueryOrderByPageReq();
+	memset(&myreq, 0, sizeof(myreq));
+	getInt64(req, "req_count", &myreq.req_count);
+	getInt64(req, "reference", &myreq.reference);
+	getInt64(req, "reserved", &myreq.reserved);
+	return this->api->QueryOrdersByPage(&myreq, sessionid, reqid);
+};
+
+int TraderApi::queryTradesByPage(dict req, uint64_t sessionid, int reqid)
+{
+	XTPQueryTraderByPageReq myreq = XTPQueryTraderByPageReq();
+	memset(&myreq, 0, sizeof(myreq));
+	getInt64(req, "req_count", &myreq.req_count);
+	getInt64(req, "reference", &myreq.reference);
+	getInt64(req, "reserved", &myreq.reserved);
+	return this->api->QueryTradesByPage(&myreq, sessionid, reqid);
+};
+
+bool TraderApi::isServerRestart(uint64_t session_id)
+{
+	return this->api->IsServerRestart(session_id);
+};
 
 ///-------------------------------------------------------------------------------------
 ///Boost.Python封装
@@ -1555,11 +1709,35 @@ struct TraderApiWrap : TraderApi, wrapper < TraderApi >
 		}
 	};
 
+	virtual void onQueryOrderByPage(dict data, int64_t req_count, int64_t order_sequence, int64_t query_reference, int reqid, bool last, uint64_t session)
+	{
+		try
+		{
+			this->get_override("onQueryOrderByPage")(data,req_count,order_sequence, query_reference, reqid, last, session);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
 	virtual void onQueryTrade(dict data, dict error, int id, bool last, uint64_t session)
 	{
 		try
 		{
 			this->get_override("onQueryTrade")(data, error, id, last, session);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onQueryTradeByPage(dict data, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int reqid, bool last, uint64_t session)
+	{
+		try
+		{
+			this->get_override("onQueryTradeByPage")(data, req_count,trade_sequence,query_reference, reqid, last, session);
 		}
 		catch (error_already_set const &)
 		{
@@ -1727,6 +1905,9 @@ BOOST_PYTHON_MODULE(vnxtptrader)
 		.def("queryIPOQuotaInfo", &TraderApiWrap::queryIPOQuotaInfo)
 
 		.def("queryOptionAuctionInfo", &TraderApiWrap::queryOptionAuctionInfo)
+		.def("queryOrdersByPage", &TraderApiWrap::queryOrdersByPage)
+		.def("queryTradesByPage", &TraderApiWrap::queryTradesByPage)
+		.def("isServerRestart", &TraderApiWrap::isServerRestart)
 
 		.def("onDisconnected", pure_virtual(&TraderApiWrap::onDisconnected))
 		.def("onError", pure_virtual(&TraderApiWrap::onError))
@@ -1746,5 +1927,7 @@ BOOST_PYTHON_MODULE(vnxtptrader)
 		.def("onQueryIPOQuotaInfo", pure_virtual(&TraderApiWrap::onQueryIPOQuotaInfo))
 
 		.def("onQueryOptionAuctionInfo", pure_virtual(&TraderApiWrap::onQueryOptionAuctionInfo))
+		.def("onQueryOrderByPage", pure_virtual(&TraderApiWrap::onQueryOrderByPage))
+		.def("onQueryTradeByPage", pure_virtual(&TraderApiWrap::onQueryTradeByPage))
 		;
 };

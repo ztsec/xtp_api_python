@@ -186,6 +186,17 @@ struct XTPQueryOrderReq
 typedef struct XTPOrderInfo XTPQueryOrderRsp;
 
 
+///查询订单请求-分页查询
+struct XTPQueryOrderByPageReq
+{
+	///需要查询的订单条数
+    int64_t         req_count;
+	///上一次收到的查询订单结果中带回来的索引，如果是从头查询，请置0
+    int64_t         reference;
+	///保留字段
+    int64_t         reserved;
+};
+
 //////////////////////////////////////////////////////////////////////////
 ///成交回报查询
 //////////////////////////////////////////////////////////////////////////
@@ -212,7 +223,16 @@ struct XTPQueryTraderReq
 ///成交回报查询响应结构体
 typedef struct XTPTradeReport  XTPQueryTradeRsp;
 
-
+///查询成交回报请求-分页查询
+struct XTPQueryTraderByPageReq
+{
+	///需要查询的成交回报条数
+	int64_t         req_count;
+	///上一次收到的查询成交回报结果中带回来的索引，如果是从头查询，请置0
+	int64_t         reference;
+	///保留字段
+	int64_t         reserved;
+};
 
 //////////////////////////////////////////////////////////////////////////
 ///账户资金查询响应结构体
@@ -463,6 +483,8 @@ struct XTPQueryIPOTickerRsp {
     char                ticker[XTP_TICKER_LEN];
     ///申购股票名称
     char                ticker_name[XTP_TICKER_NAME_LEN]; 
+    // 证券类别
+    XTP_TICKER_TYPE     ticker_type;
     ///申购价格
     double              price;
     ///申购单元         
@@ -472,15 +494,33 @@ struct XTPQueryIPOTickerRsp {
 };
 
 
+
 //////////////////////////////////////////////////////////////////////////
-///查询用户申购额度
+///查询用户申购额度-旧版
+//////////////////////////////////////////////////////////////////////////
+struct XTPQueryIPOQuotaRspV1 {
+    ///交易市场
+    XTP_MARKET_TYPE     market;
+    ///可申购额度
+    int32_t             quantity;
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+///查询用户申购额度-包含创业板额度
 //////////////////////////////////////////////////////////////////////////
 struct XTPQueryIPOQuotaRsp {
     ///交易市场
     XTP_MARKET_TYPE     market;
     ///可申购额度
     int32_t             quantity;
+    // 上海科创板额度
+    int32_t             tech_quantity;
+    // 保留
+    int32_t             unused;
 };
+
+
 
 //////////////////////////////////////////////////////////////////////////
 ///查询期权竞价交易业务参考信息--请求结构体,请求参数为:交易市场+8位期权代码
