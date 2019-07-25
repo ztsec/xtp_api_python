@@ -8,7 +8,9 @@
 
 API参考官方C++版本的接口文档https://xtp.zts.com.cn/home
 
-由于python版api的封装用的是vs2010,如果未安装vs环境,运行时会提示ImportError:DLL load failed。需要根据python的位数选择对应的运行库,32位的选x86,64位选x64,下载链接分别:https://www.microsoft.com/zh-cn/download/confirmation.aspx?id=5555,https://www.microsoft.com/zh-cn/download/confirmation.aspx?id=14632
+由于python版api的封装用的是vs2010,如果未安装vs环境,运行时会提示ImportError:DLL load failed。需要根据python的位数选择对应的运行库,32位的选x86,64位选x64,下载链接分别
+x86网址:https://www.microsoft.com/zh-cn/download/confirmation.aspx?id=5555
+x64网址:https://www.microsoft.com/zh-cn/download/confirmation.aspx?id=14632
 
 ##事项说明:
 
