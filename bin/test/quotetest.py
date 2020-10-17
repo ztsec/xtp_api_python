@@ -386,23 +386,84 @@ class TestApi(QuoteApi):
         print("error['error_id']):",error['error_id'])
         print("error['error_msg']):",error['error_msg'])
 
+    #查询合约完整静态信息的应答
+    #@param ticker_info 合约完整静态信息
+    #@param error_info 查询合约完整静态信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+    #@param is_last 是否此次查询合约完整静态信息的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+    def onQueryAllTickersFullInfo(self,data, error, last):
+        """"""
+        printFuncName('onQueryAllTickersFullInfo', data, error, last)
+        print("data['exchange_id']:",data['exchange_id'])#交易所代码
+        print("data['ticker']:",data['ticker'])#证券代码
+        print("data['ticker_name']:",data['ticker_name'])#证券名称
+        print("data['security_type']:",data['security_type'])#合约详细类型
+        print("data['ticker_qualification_class']:",data['ticker_qualification_class'])#合约适当性类别
+        print("data['is_registration']:",data['is_registration'])#是否注册制(仅适用创业板股票，创新企业股票及存托凭证)
+        print("data['is_VIE']:",data['is_VIE'])#是否具有协议控制架构(仅适用创业板股票，创新企业股票及存托凭证)
+        print("data['is_noprofit']:",data['is_noprofit'])#是否尚未盈利(仅适用创业板股票，创新企业股票及存托凭证)
+        print("data['is_weighted_voting_rights']:",data['is_weighted_voting_rights'])#是否存在投票权差异(仅适用创业板股票，创新企业股票及存托凭证)
+        print("data['is_have_price_limit']:",data['is_have_price_limit'])#是否有涨跌幅限制(注：不提供具体幅度，可通过涨跌停价和昨收价来计算幅度)
+        print("data['upper_limit_price']:",data['upper_limit_price'])#涨停价（仅在有涨跌幅限制时有效）
+        print("data['lower_limit_price']:",data['lower_limit_price'])#跌停价（仅在有涨跌幅限制时有效）
+        print("data['pre_close_price']:",data['pre_close_price'])#昨收价
+        print("data['price_tick']:",data['price_tick'])#价格最小变动价位
+        print("data['bid_qty_upper_limit']:",data['bid_qty_upper_limit'])#限价买委托数量上限
+        print("data['bid_qty_lower_limit']:",data['bid_qty_lower_limit'])#限价买委托数量下限
+        print("data['bid_qty_unit']:",data['bid_qty_unit'])#限价买数量单位
+        print("data['ask_qty_upper_limit']:",data['ask_qty_upper_limit'])#限价卖委托数量上限
+        print("data['ask_qty_lower_limit']:",data['ask_qty_lower_limit'])#限价卖委托数量下限
+        print("data['ask_qty_unit']:",data['ask_qty_unit'])#限价卖数量单位
+        print("data['market_bid_qty_upper_limit']:",data['market_bid_qty_upper_limit'])#市价买委托数量上限
+        print("data['market_bid_qty_lower_limit']:",data['market_bid_qty_lower_limit'])#市价买委托数量下限
+        print("data['market_bid_qty_unit']:",data['market_bid_qty_unit'])#市价买数量单位
+        print("data['market_ask_qty_upper_limit']:",data['market_ask_qty_upper_limit'])#市价卖委托数量上限
+        print("data['market_ask_qty_lower_limit']:",data['market_ask_qty_lower_limit'])#市价卖委托数量下限
+        print("data['market_ask_qty_unit']:",data['market_ask_qty_unit'])#市价卖数量单位
+        print("error['error_id']):",error['error_id'])
+        print("error['error_msg']):",error['error_msg'])
+
 
 
 if __name__ == '__main__':
 
     ip = '120.27.164.138'
     port = 6002
-    user = 'user'
+    user = 'username'
     password = 'password'
+    local_ip = '127.0.0.1'
     #创建QuoteApi
     #@param client_id （必须输入）用于区分同一用户的不同客户端，由用户自定义
     #@param save_file_path （必须输入）存贮订阅信息文件的目录，请设定一个有可写权限的真实存在的路径
-    #@param log_level 日志输出级别 “0”代表严重错误级别,“1”代表错误级别,“2”代表警告级别,“3”代表info级别,“4”代表debug级别，“5”代表trace级别
+    #@param log_level 日志输出级别
     #@return 创建出的UserApi
     #@remark 如果一个账户需要在多个客户端登录，请使用不同的client_id，系统允许一个账户同时登录多个客户端，但是对于同一账户，相同的client_id只能保持一个session连接，后面的登录在前一个session存续期间，无法连接
     api = TestApi()
-    createQuoteAp = api.createQuoteApi(1, os.getcwd(),4)
-    printFuncName("createQuoteAp", createQuoteAp)
+    api.createQuoteApi(1, os.getcwd(),4)
+
+    # 1.1.6测试函数
+    #设置心跳检测时间间隔，单位为秒
+    #@param interval 心跳检测时间间隔，单位为秒
+    #@remark 此函数必须在Login之前调用
+    api.setHeartBeatInterval(2)
+
+    #设置采用UDP方式连接时的接收缓冲区大小
+    #@remark 需要在Login之前调用，默认大小和最小设置均为64MB。此缓存大小单位为MB，请输入2的次方数，例如128MB请输入128。
+    api.setUDPBufferSize(128)
+
+    #使用UDP接收行情时，设置接收行情线程绑定的cpu
+    #@param cpu_no 设置绑定的cpu，例如绑定cpu 0，可以设置0，绑定cpu 2，可以设置2，建议绑定后面的cpu
+    #@remark 此函数可不调用，如果调用则必须在Login之前调用，否则不会生效
+    api.setUDPRecvThreadAffinity(2)
+
+    #使用UDP接收行情时，设置解析行情线程绑定的cpu
+    #@param cpu_no 设置绑定的cpu，例如绑定cpu 0，可以设置0，绑定cpu 2，可以设置2，建议绑定后面的cpu
+    #@remark 此函数可不调用，如果调用则必须在Login之前调用，否则不会生效
+    api.setUDPParseThreadAffinity(2)
+
+    #设定UDP收行情时是否输出异步日志
+    #@param flag 是否输出标识，默认为true，如果不想输出“udpseq”开头的异步日志，请设置此参数为false
+    #@remark 此函数可不调用，如果调用则必须在Login之前调用，否则不会生效
+    api.setUDPSeqLogOutPutFlag(1)
 
     #用户登录请求
     #@return 登录是否成功，“0”表示登录成功，“-1”表示连接服务器出错，此时用户可以调用GetApiLastError()来获取错误代码，“-2”表示已存在连接，不允许重复登录，如果需要重连，请先logout，“-3”表示输入有错误
@@ -411,21 +472,10 @@ if __name__ == '__main__':
     #@param user 登陆用户名
     #@param password 登陆密码
     #@param sock_type “1”代表TCP，“2”代表UDP
+    #@param local_ip 本地网卡地址，类似“127.0.0.1”
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api只能有一个连接
-    retLogin = api.login(ip, port, user, password, 1)
+    retLogin = api.login(ip, port, user, password, 1,local_ip)
     printFuncName('login', retLogin)
-
-    # 1.1.6测试函数
-    #设置心跳检测时间间隔，单位为秒
-    #@param interval 心跳检测时间间隔，单位为秒
-    #@remark 此函数必须在Login之前调用
-    setHeartBeatInterval = api.setHeartBeatInterval(2)
-    printFuncName("setHeartBeatInterval", setHeartBeatInterval)
-
-    #设置采用UDP方式连接时的接收缓冲区大小
-    #@remark 需要在Login之前调用，默认大小和最小设置均为64MB。此缓存大小单位为MB，请输入2的次方数，例如128MB请输入128。
-    setUDPBufferSize = api.setUDPBufferSize(64)
-    printFuncName("setUDPBufferSize", setUDPBufferSize)
 
     #获取API的系统错误
     #@return 返回的错误信息，可以在Login、Logout、订阅、取消订阅失败时调用，获取失败的原因
@@ -624,6 +674,13 @@ if __name__ == '__main__':
     sleep(1)
     unSubscribeAllOptionTickByTick = api.unSubscribeAllOptionTickByTick(2)
     printFuncName('unsubscribeAllOptionTickByTick', unSubscribeAllOptionTickByTick)
+
+    #获取当前交易日合约的详细静态信息
+    #@return 发送查询请求是否成功，“0”表示发送查询请求成功，非“0”表示发送查询请求不成功
+    #@param exchange_id 交易所代码，必须提供 1-上海 2-深圳
+    sleep(1)
+    queryAllTickersFullInfo = api.queryAllTickersFullInfo(2)
+    printFuncName('queryAllTickersFullInfo', queryAllTickersFullInfo)
 
     #sleep为了删除接口对象前将回调数据输出，不sleep直接删除回调对象会自动析构，无法返回回调的数据
     sleep(5)
