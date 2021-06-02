@@ -1,9 +1,9 @@
-//˵������
+//说明部分
 
 //API
 #include "xtp_quote_api.h"
 
-//ϵͳ
+//系统
 //#ifdef WIN32
 //#include "stdafx.h"
 //#endif
@@ -13,23 +13,23 @@
 
 //Boost
 #define BOOST_PYTHON_STATIC_LIB
-#include <boost/python/module.hpp>	//python��װ
-#include <boost/python/def.hpp>		//python��װ
-#include <boost/python/dict.hpp>	//python��װ
-#include <boost/python/list.hpp>	//python��װ
-#include <boost/python/object.hpp>	//python��װ
-#include <boost/python.hpp>			//python��װ
-#include <boost/thread.hpp>			//������е��̹߳���
-#include <boost/bind.hpp>			//������е��̹߳���
+#include <boost/python/module.hpp>	//python封装
+#include <boost/python/def.hpp>		//python封装
+#include <boost/python/dict.hpp>	//python封装
+#include <boost/python/list.hpp>	//python封装
+#include <boost/python/object.hpp>	//python封装
+#include <boost/python.hpp>			//python封装
+#include <boost/thread.hpp>			//任务队列的线程功能
+#include <boost/bind.hpp>			//任务队列的线程功能
 
 
-//�����ռ�
+//命名空间
 using namespace std;
 using namespace boost::python;
 using namespace boost;
 
 
-//����
+//常量
 #define ONDISCONNECTED 1
 #define ONERROR 2
 #define ONSUBMARKETDATA 3
@@ -58,24 +58,24 @@ using namespace boost;
 #define ONUNSUBSCRIBEALLOPTIONTICKBYTICK 25
 #define ONQUERYALLTICKERSFULLINFO 26
 ///-------------------------------------------------------------------------------------
-///API�еĲ������
+///API中的部分组件
 ///-------------------------------------------------------------------------------------
 
-//GILȫ�����򻯻�ȡ�ã�
-//���ڰ���C++�̻߳��GIL�����Ӷ���ֹpython����
+//GIL全局锁简化获取用，
+//用于帮助C++线程获得GIL锁，从而防止python崩溃
 class PyLock
 {
 private:
 	PyGILState_STATE gil_state;
 
 public:
-	//��ĳ�����������д����ö���ʱ�����GIL��
+	//在某个函数方法中创建该对象时，获得GIL锁
 	PyLock()
 	{
 		gil_state = PyGILState_Ensure();
 	}
 
-	//��ĳ��������ɺ����ٸö���ʱ�����GIL��
+	//在某个函数完成后销毁该对象时，解放GIL锁
 	~PyLock()
 	{
 		PyGILState_Release(gil_state);
@@ -83,95 +83,95 @@ public:
 };
 
 
-//����ṹ��
+//任务结构体
 struct Task
 {
-	int task_name;		//�ص��������ƶ�Ӧ�ĳ���
-	void *task_data;	//���ݽṹ��
-	void *task_error;	//����ṹ��
-	int task_id;		//����id
-	bool task_last;		//�Ƿ�Ϊ��󷵻�
-	int exchange_id;    //�����г�
-	void *task_data_one;	//���ݽṹ��
+	int task_name;		//回调函数名称对应的常量
+	void *task_data;	//数据结构体
+	void *task_error;	//错误结构体
+	int task_id;		//请求id
+	bool task_last;		//是否为最后返回
+	int exchange_id;    //交易市场
+	void *task_data_one;	//数据结构体
 	int task_one_counts;
 	int task_one_all_counts;
-	void *task_data_two;	//���ݽṹ��
+	void *task_data_two;	//数据结构体
 	int task_two_counts;
 	int task_two_all_counts;
 
 };
 
 
-///�̰߳�ȫ�Ķ���
+///线程安全的队列
 template<typename Data>
 
 class ConcurrentQueue
 {
 private:
-	queue<Data> the_queue;								//��׼�����
-	mutable mutex the_mutex;							//boost������
-	condition_variable the_condition_variable;			//boost��������
+	queue<Data> the_queue;								//标准库队列
+	mutable mutex the_mutex;							//boost互斥锁
+	condition_variable the_condition_variable;			//boost条件变量
 
 public:
 
-	//�����µ�����
+	//存入新的任务
 	void push(Data const& data)
 	{
-		mutex::scoped_lock lock(the_mutex);				//��ȡ������
-		the_queue.push(data);							//������д�������
-		lock.unlock();									//�ͷ���
-		the_condition_variable.notify_one();			//֪ͨ���������ȴ����߳�
+		mutex::scoped_lock lock(the_mutex);				//获取互斥锁
+		the_queue.push(data);							//向队列中存入数据
+		lock.unlock();									//释放锁
+		the_condition_variable.notify_one();			//通知正在阻塞等待的线程
 	}
 
-	//�������Ƿ�Ϊ��
+	//检查队列是否为空
 	bool empty() const
 	{
 		mutex::scoped_lock lock(the_mutex);
 		return the_queue.empty();
 	}
 
-	//ȡ��
+	//取出
 	Data wait_and_pop()
 	{
 		mutex::scoped_lock lock(the_mutex);
 
-		while (the_queue.empty())						//������Ϊ��ʱ
+		while (the_queue.empty())						//当队列为空时
 		{
-			the_condition_variable.wait(lock);			//�ȴ���������֪ͨ
+			the_condition_variable.wait(lock);			//等待条件变量通知
 		}
 
-		Data popped_value = the_queue.front();			//��ȡ�����е����һ������
-		the_queue.pop();								//ɾ��������
-		return popped_value;							//���ظ�����
+		Data popped_value = the_queue.front();			//获取队列中的最后一个任务
+		the_queue.pop();								//删除该任务
+		return popped_value;							//返回该任务
 	}
 
 };
 
 
-//���ֵ��л�ȡĳ����ֵ��Ӧ������������ֵ������ṹ������ֵ��
+//从字典中获取某个建值对应的整数，并赋值到请求结构体对象的值上
 void getInt(dict d, string key, int* value);
 
-//���ֵ��л�ȡĳ����ֵ��Ӧ�ĸ�����������ֵ������ṹ������ֵ��
+//从字典中获取某个建值对应的浮点数，并赋值到请求结构体对象的值上
 void getDouble(dict d, string key, double* value);
 
-//���ֵ��л�ȡĳ����ֵ��Ӧ���ַ�������ֵ������ṹ������ֵ��
+//从字典中获取某个建值对应的字符，并赋值到请求结构体对象的值上
 void getChar(dict d, string key, char* value);
 
-//���ֵ��л�ȡĳ����ֵ��Ӧ���ַ���������ֵ������ṹ������ֵ��
+//从字典中获取某个建值对应的字符串，并赋值到请求结构体对象的值上
 void getStr(dict d, string key, char* value);
 
 
 ///-------------------------------------------------------------------------------------
-///C++ SPI�Ļص���������ʵ��
+///C++ SPI的回调函数方法实现
 ///-------------------------------------------------------------------------------------
 
-//API�ļ̳�ʵ��
+//API的继承实现
 class QuoteApi : public XTP::API::QuoteSpi
 {
 private:
-	XTP::API::QuoteApi* api;			//API����
-	thread *task_thread;				//�����߳�ָ�루��python���������ݣ�
-	ConcurrentQueue<Task*> task_queue;	//�������
+	XTP::API::QuoteApi* api;			//API对象
+	thread *task_thread;				//工作线程指针（向python中推送数据）
+	ConcurrentQueue<Task*> task_queue;	//任务队列
 
 public:
 	QuoteApi()
@@ -186,170 +186,170 @@ public:
 	};
 
 	//-------------------------------------------------------------------------------------
-	//API�ص�����
+	//API回调函数
 	//-------------------------------------------------------------------------------------
 
-	///���ͻ����������̨ͨ�����ӶϿ�ʱ���÷��������á�
-	///@param reason ����ԭ���������������Ӧ
-	///@remark api�����Զ������������߷���ʱ�����û�����ѡ����������������ڴ˺����е���Login���µ�¼��ע���û����µ�¼����Ҫ���¶�������
+	///当客户端与行情后台通信连接断开时，该方法被调用。
+	///@param reason 错误原因，请与错误代码表对应
+	///@remark api不会自动重连，当断线发生时，请用户自行选择后续操作。可以在此函数中调用Login重新登录。注意用户重新登录后，需要重新订阅行情
 	virtual void OnDisconnected(int reason);
 
 
-	///����Ӧ��
-	///@param error_info ����������Ӧ��������ʱ�ľ���Ĵ������ʹ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark �˺���ֻ���ڷ�������������ʱ�Ż���ã�һ�������û�����
+	///错误应答
+	///@param error_info 当服务器响应发生错误时的具体的错误代码和错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 此函数只有在服务器发生错误时才会调用，一般无需用户处理
 	virtual void OnError(XTPRI *error_info);
 
-	///��������Ӧ��
-	///@param ticker ��ϸ�ĺ�Լ�������
-	///@param error_info ���ĺ�Լ��������ʱ�Ĵ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴ζ��ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ�����ĵĺ�Լ����Ӧһ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///订阅行情应答
+	///@param ticker 详细的合约订阅情况
+	///@param error_info 订阅合约发生错误时的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条订阅的合约均对应一条订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///�˶�����Ӧ��
-	///@param ticker ��ϸ�ĺ�Լȡ���������
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴�ȡ�����ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ��ȡ�����ĵĺ�Լ����Ӧһ��ȡ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///退订行情应答
+	///@param ticker 详细的合约取消订阅情况
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次取消订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条取消订阅的合约均对应一条取消订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnUnSubMarketData(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///�������֪ͨ��������һ��һ����
-	///@param market_data ��������
-	///@param bid1_qty ��һ��������
-	///@param bid1_count ��һ���е���Чί�б���
-	///@param max_bid1_count ��һ������ί�б���
-	///@param ask1_qty ��һ��������
-	///@param ask1_count ��һ���е���Чί�б���
-	///@param max_ask1_count ��һ������ί�б���
-	///@remark ��Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///深度行情通知，包含买一卖一队列
+	///@param market_data 行情数据
+	///@param bid1_qty 买一队列数据
+	///@param bid1_count 买一队列的有效委托笔数
+	///@param max_bid1_count 买一队列总委托笔数
+	///@param ask1_qty 卖一队列数据
+	///@param ask1_count 卖一队列的有效委托笔数
+	///@param max_ask1_count 卖一队列总委托笔数
+	///@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnDepthMarketData(XTPMD *market_data, int64_t bid1_qty[], int32_t bid1_count, int32_t max_bid1_count, int64_t ask1_qty[], int32_t ask1_count, int32_t max_ask1_count);
 
-	///�������鶩����Ӧ��
-	///@param ticker ��ϸ�ĺ�Լ�������
-	///@param error_info ���ĺ�Լ��������ʱ�Ĵ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴ζ��ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ�����ĵĺ�Լ����Ӧһ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///订阅行情订单簿应答
+	///@param ticker 详细的合约订阅情况
+	///@param error_info 订阅合约发生错误时的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条订阅的合约均对应一条订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnSubOrderBook(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///�˶����鶩����Ӧ��
-	///@param ticker ��ϸ�ĺ�Լȡ���������
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴�ȡ�����ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ��ȡ�����ĵĺ�Լ����Ӧһ��ȡ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///退订行情订单簿应答
+	///@param ticker 详细的合约取消订阅情况
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次取消订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条取消订阅的合约均对应一条取消订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnUnSubOrderBook(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///���鶩����֪ͨ
-	///@param order_book ���鶩�������ݣ���Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///行情订单簿通知
+	///@param order_book 行情订单簿数据，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnOrderBook(XTPOB *order_book);
 
-	///�����������Ӧ��
-	///@param ticker ��ϸ�ĺ�Լ�������
-	///@param error_info ���ĺ�Լ��������ʱ�Ĵ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴ζ��ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ�����ĵĺ�Լ����Ӧһ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///订阅逐笔行情应答
+	///@param ticker 详细的合约订阅情况
+	///@param error_info 订阅合约发生错误时的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条订阅的合约均对应一条订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///�˶��������Ӧ��
-	///@param ticker ��ϸ�ĺ�Լȡ���������
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴�ȡ�����ĵ����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
-	///@remark ÿ��ȡ�����ĵĺ�Լ����Ӧһ��ȡ������Ӧ����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///退订逐笔行情应答
+	///@param ticker 详细的合约取消订阅情况
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次取消订阅的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	///@remark 每条取消订阅的合约均对应一条取消订阅应答，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnUnSubTickByTick(XTPST *ticker, XTPRI *error_info, bool is_last);
 
-	///�������֪ͨ
-	///@param tbt_data ����������ݣ��������ί�к���ʳɽ�����Ϊ���ýṹ�壬��Ҫ����type�����������ί�л�����ʳɽ�����Ҫ���ٷ��أ���������������Ϣ������������ʱ���ᴥ������
+	///逐笔行情通知
+	///@param tbt_data 逐笔行情数据，包括逐笔委托和逐笔成交，此为共用结构体，需要根据type来区分是逐笔委托还是逐笔成交，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
 	virtual void OnTickByTick(XTPTBT *tbt_data);
 
-	///����ȫ�г��Ĺ�Ʊ����Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的股票行情应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllMarketData(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///�˶�ȫ�г�������Ӧ��
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的行情应答
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllMarketData(XTP_EXCHANGE_TYPE exchage_id,XTPRI *error_info);
 
-	///����ȫ�г������鶩����Ӧ��
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的行情订单簿应答
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllOrderBook(XTP_EXCHANGE_TYPE exchage_id,XTPRI *error_info);
 
-	///�˶�ȫ�г������鶩����Ӧ��
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的行情订单簿应答
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllOrderBook(XTP_EXCHANGE_TYPE exchage_id,XTPRI *error_info);
 
-	///����ȫ�г����������Ӧ��
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的逐笔行情应答
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchage_id,XTPRI *error_info);
 
-	///�˶�ȫ�г����������Ӧ��
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的逐笔行情应答
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllTickByTick(XTP_EXCHANGE_TYPE exchage_id,XTPRI *error_info);
 
 
-	///��ѯ�ɽ��׺�Լ��Ӧ��
-	///@param ticker_info �ɽ��׺�Լ��Ϣ
-	///@param error_info ��ѯ�ɽ��׺�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴β�ѯ�ɽ��׺�Լ�����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
+	///查询可交易合约的应答
+	///@param ticker_info 可交易合约信息
+	///@param error_info 查询可交易合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次查询可交易合约的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
 	virtual void OnQueryAllTickers(XTPQSI* ticker_info, XTPRI *error_info, bool is_last);
 
-	///��ѯ��Լ�����¼۸���ϢӦ��
-	///@param ticker_info ��Լ�����¼۸���Ϣ
-	///@param error_info ��ѯ��Լ�����¼۸���Ϣʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴β�ѯ�����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
+	///查询合约的最新价格信息应答
+	///@param ticker_info 合约的最新价格信息
+	///@param error_info 查询合约的最新价格信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次查询的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
 	virtual void OnQueryTickersPriceInfo(XTPTPI* ticker_info, XTPRI *error_info, bool is_last);
 
 
-	///����ȫ�г�����Ȩ����Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的期权行情应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllOptionMarketData(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///�˶�ȫ�г�����Ȩ����Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的期权行情应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllOptionMarketData(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///����ȫ�г�����Ȩ���鶩����Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的期权行情订单簿应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllOptionOrderBook(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///�˶�ȫ�г�����Ȩ���鶩����Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的期权行情订单簿应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllOptionOrderBook(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///����ȫ�г�����Ȩ�������Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///订阅全市场的期权逐笔行情应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///�˶�ȫ�г�����Ȩ�������Ӧ��
-	///@param exchage_id ��ʾ��ǰȫ���ĵ��г������ΪXTP_EXCHANGE_UNKNOWN����ʾ����ȫ�г���XTP_EXCHANGE_SH��ʾΪ�Ϻ�ȫ�г���XTP_EXCHANGE_SZ��ʾΪ����ȫ�г�
-	///@param error_info ȡ�����ĺ�Լʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@remark ��Ҫ���ٷ���
+	///退订全市场的期权逐笔行情应答
+	///@param exchage_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN，表示沪深全市场，XTP_EXCHANGE_SH表示为上海全市场，XTP_EXCHANGE_SZ表示为深圳全市场
+	///@param error_info 取消订阅合约时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@remark 需要快速返回
 	virtual void OnUnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchage_id, XTPRI *error_info);
 
-	///��ѯ��Լ������̬��Ϣ��Ӧ��
-	///@param ticker_info ��Լ������̬��Ϣ
-	///@param error_info ��ѯ��Լ������̬��Ϣʱ��������ʱ���صĴ�����Ϣ����error_infoΪ�գ�����error_info.error_idΪ0ʱ������û�д���
-	///@param is_last �Ƿ�˴β�ѯ��Լ������̬��Ϣ�����һ��Ӧ�𣬵�Ϊ���һ����ʱ��Ϊtrue�����Ϊfalse����ʾ��������������Ϣ��Ӧ
+	///查询合约完整静态信息的应答
+	///@param ticker_info 合约完整静态信息
+	///@param error_info 查询合约完整静态信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	///@param is_last 是否此次查询合约完整静态信息的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
 	virtual void OnQueryAllTickersFullInfo(XTPQFI* ticker_info, XTPRI *error_info, bool is_last);
 
 	//-------------------------------------------------------------------------------------
-	//task������
+	//task：任务
 	//-------------------------------------------------------------------------------------
 
 	void processTask();
@@ -407,11 +407,11 @@ public:
 
 	void processUnSubscribeAllOptionTickByTick(Task *task);
 	//-------------------------------------------------------------------------------------
-	//data���ص������������ֵ�
-	//error���ص������Ĵ����ֵ�
-	//id������id
-	//last���Ƿ�Ϊ��󷵻�
-	//i������
+	//data：回调函数的数据字典
+	//error：回调函数的错误字典
+	//id：请求id
+	//last：是否为最后返回
+	//i：整数
 	//-------------------------------------------------------------------------------------
 
 	virtual void onDisconnected(int reason) {};
@@ -467,10 +467,10 @@ public:
 
 	virtual void onUnSubscribeAllOptionTickByTick(int exchange_id,dict error) {};
 	//-------------------------------------------------------------------------------------
-	//req:���������������ֵ�
+	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	void createQuoteApi(int clientid, string path, int log_level);
+	void createQuoteApi(int clientid, char * path, int log_level);
 
 	void release();
 

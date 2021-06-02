@@ -1,34 +1,34 @@
-// vnctpmd.cpp : ¶¨Òå DLL Ó¦ÓÃ³ÌĞòµÄµ¼³öº¯Êı¡£
+// vnctpmd.cpp : å®šä¹‰ DLL åº”ç”¨ç¨‹åºçš„å¯¼å‡ºå‡½æ•°ã€‚
 //
 //#include "stdafx.h"
 #include "vnxtptrader.h"
 
 ///-------------------------------------------------------------------------------------
-///´ÓPython¶ÔÏóµ½C++ÀàĞÍ×ª»»ÓÃµÄº¯Êı
+///ä»Pythonå¯¹è±¡åˆ°C++ç±»å‹è½¬æ¢ç”¨çš„å‡½æ•°
 ///-------------------------------------------------------------------------------------
 
-// Ç¶Ì×½á¹¹Ìå-intÀàĞÍ´¦Àí
+// åµŒå¥—ç»“æ„ä½“-intç±»å‹å¤„ç†
 void getNestedDictValue(dict d, string key1, string key2, int *value) {
-	if (d.has_key(key1)) {        //¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
-		dict o1 = (dict)d[key1];    //»ñÈ¡¸Ã¼üÖµ
+	if (d.has_key(key1)) {        //æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
+		dict o1 = (dict)d[key1];    //è·å–è¯¥é”®å€¼
 		if (o1.has_key(key2)) {
-			object o2 = o1[key2];    //»ñÈ¡¸Ã¼üÖµ
-			extract<int> x(o2);    //´´½¨ÌáÈ¡Æ÷
-			if (x.check()) {        //Èç¹û¿ÉÒÔÌáÈ¡
-				*value = x();    //¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			object o2 = o1[key2];    //è·å–è¯¥é”®å€¼
+			extract<int> x(o2);    //åˆ›å»ºæå–å™¨
+			if (x.check()) {        //å¦‚æœå¯ä»¥æå–
+				*value = x();    //å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 			}
 		}
 	}
 }
 
-// Ç¶Ì×½á¹¹Ìå-×Ö·û´®ÀàĞÍ´¦Àí
+// åµŒå¥—ç»“æ„ä½“-å­—ç¬¦ä¸²ç±»å‹å¤„ç†
 void getNestedDictChar(dict d, string key1, string key2, char *value) {
-	if (d.has_key(key1)) {        //¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
-		dict o1 = (dict)d[key1];    //»ñÈ¡¸Ã¼üÖµ
+	if (d.has_key(key1)) {        //æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
+		dict o1 = (dict)d[key1];    //è·å–è¯¥é”®å€¼
 		if (o1.has_key(key2)) {
-			object o2 = o1[key2];    //»ñÈ¡¸Ã¼üÖµ
-			extract<string> x(o2);    //´´½¨ÌáÈ¡Æ÷
-			if (x.check()) {        //Èç¹û¿ÉÒÔÌáÈ¡
+			object o2 = o1[key2];    //è·å–è¯¥é”®å€¼
+			extract<string> x(o2);    //åˆ›å»ºæå–å™¨
+			if (x.check()) {        //å¦‚æœå¯ä»¥æå–
 				string s = x();
 				const char *buffer = s.c_str();
 #ifdef WIN32
@@ -41,16 +41,16 @@ void getNestedDictChar(dict d, string key1, string key2, char *value) {
 	}
 }
 
-// Ç¶Ì×½á¹¹ÌåÊı×é-×Ö·û´®ÀàĞÍ´¦Àí
+// åµŒå¥—ç»“æ„ä½“æ•°ç»„-å­—ç¬¦ä¸²ç±»å‹å¤„ç†
 void getNestedDictChar2(dict d, string key1, string key2, string key3, char *value, int index) {
-	if (d.has_key(key1)) {        //¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
-		dict o1 = (dict)d[key1];    //»ñÈ¡¸Ã¼üÖµ
+	if (d.has_key(key1)) {        //æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
+		dict o1 = (dict)d[key1];    //è·å–è¯¥é”®å€¼
 		if (o1.has_key(key2)) {
-			dict o2 = (dict)(((boost::python::list)o1[key2])[index]);    //»ñÈ¡¸Ã¼üÖµ
+			dict o2 = (dict)(((boost::python::list)o1[key2])[index]);    //è·å–è¯¥é”®å€¼
 			if (o2.has_key(key3)) {
-				object o3 = o2[key3];    //»ñÈ¡¸Ã¼üÖµ
-				extract<string> x(o3);    //´´½¨ÌáÈ¡Æ÷
-				if (x.check()) {        //Èç¹û¿ÉÒÔÌáÈ¡
+				object o3 = o2[key3];    //è·å–è¯¥é”®å€¼
+				extract<string> x(o3);    //åˆ›å»ºæå–å™¨
+				if (x.check()) {        //å¦‚æœå¯ä»¥æå–
 					string s = x();
 					const char *buffer = s.c_str();
 #ifdef WIN32
@@ -64,18 +64,18 @@ void getNestedDictChar2(dict d, string key1, string key2, string key3, char *val
 	}
 }
 
-// Ç¶Ì×½á¹¹ÌåÊı×é-intÀàĞÍ´¦Àí
+// åµŒå¥—ç»“æ„ä½“æ•°ç»„-intç±»å‹å¤„ç†
 void getNestedDictValue2(dict d, string key1, string key2, string key3, int *value, int index) 
 {
-	if (d.has_key(key1)) {        //¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
-		dict o1 = (dict)d[key1];    //»ñÈ¡¸Ã¼üÖµ
+	if (d.has_key(key1)) {        //æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
+		dict o1 = (dict)d[key1];    //è·å–è¯¥é”®å€¼
 		if (o1.has_key(key2)) {
-			dict o2 = (dict)(((boost::python::list)o1[key2])[index]);    //»ñÈ¡¸Ã¼üÖµ
+			dict o2 = (dict)(((boost::python::list)o1[key2])[index]);    //è·å–è¯¥é”®å€¼
 			if (o2.has_key(key3)) {
-				object o3 = o2[key3];    //»ñÈ¡¸Ã¼üÖµ
-				extract<int> x(o3);    //´´½¨ÌáÈ¡Æ÷
-				if (x.check()) {        //Èç¹û¿ÉÒÔÌáÈ¡
-					*value = x();    //¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+				object o3 = o2[key3];    //è·å–è¯¥é”®å€¼
+				extract<int> x(o3);    //åˆ›å»ºæå–å™¨
+				if (x.check()) {        //å¦‚æœå¯ä»¥æå–
+					*value = x();    //å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 				}
 			}
 		}
@@ -84,52 +84,52 @@ void getNestedDictValue2(dict d, string key1, string key2, string key3, int *val
 
 void getInt(dict d, string key, int *value)
 {
-	if (d.has_key(key))		//¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
+	if (d.has_key(key))		//æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
 	{
-		object o = d[key];	//»ñÈ¡¸Ã¼üÖµ
-		extract<int> x(o);	//´´½¨ÌáÈ¡Æ÷
-		if (x.check())		//Èç¹û¿ÉÒÔÌáÈ¡
+		object o = d[key];	//è·å–è¯¥é”®å€¼
+		extract<int> x(o);	//åˆ›å»ºæå–å™¨
+		if (x.check())		//å¦‚æœå¯ä»¥æå–
 		{
-			*value = x();	//¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			*value = x();	//å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 		}
 	}
 };
 
 void getUint64(dict d, string key, uint64_t *value)
 {
-	if (d.has_key(key))		//¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
+	if (d.has_key(key))		//æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
 	{
-		object o = d[key];	//»ñÈ¡¸Ã¼üÖµ
-		extract<int> x(o);	//´´½¨ÌáÈ¡Æ÷
-		if (x.check())		//Èç¹û¿ÉÒÔÌáÈ¡
+		object o = d[key];	//è·å–è¯¥é”®å€¼
+		extract<int> x(o);	//åˆ›å»ºæå–å™¨
+		if (x.check())		//å¦‚æœå¯ä»¥æå–
 		{
-			*value = x();	//¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			*value = x();	//å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 		}
 	}
 };
 
 void getUint32(dict d, string key, uint32_t *value)
 {
-	if (d.has_key(key))		//¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
+	if (d.has_key(key))		//æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
 	{
-		object o = d[key];	//»ñÈ¡¸Ã¼üÖµ
-		extract<int> x(o);	//´´½¨ÌáÈ¡Æ÷
-		if (x.check())		//Èç¹û¿ÉÒÔÌáÈ¡
+		object o = d[key];	//è·å–è¯¥é”®å€¼
+		extract<int> x(o);	//åˆ›å»ºæå–å™¨
+		if (x.check())		//å¦‚æœå¯ä»¥æå–
 		{
-			*value = x();	//¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			*value = x();	//å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 		}
 	}
 };
 
 void getInt64(dict d, string key, int64_t *value)
 {
-	if (d.has_key(key))		//¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
+	if (d.has_key(key))		//æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
 	{
-		object o = d[key];	//»ñÈ¡¸Ã¼üÖµ
-		extract<int> x(o);	//´´½¨ÌáÈ¡Æ÷
-		if (x.check())		//Èç¹û¿ÉÒÔÌáÈ¡
+		object o = d[key];	//è·å–è¯¥é”®å€¼
+		extract<int> x(o);	//åˆ›å»ºæå–å™¨
+		if (x.check())		//å¦‚æœå¯ä»¥æå–
 		{
-			*value = x();	//¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			*value = x();	//å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 		}
 	}
 };
@@ -157,8 +157,8 @@ void getStr(dict d, string key, char *value)
 		{
 			string s = x();
 			const char *buffer = s.c_str();
-			//¶Ô×Ö·û´®Ö¸Õë¸³Öµ±ØĞëÊ¹ÓÃstrcpy_s, vs2013Ê¹ÓÃstrcpy±àÒëÍ¨²»¹ı
-			//+1Ó¦¸ÃÊÇÒòÎªC++×Ö·û´®µÄ½áÎ²·ûºÅ£¿²»ÊÇÌØ±ğÈ·¶¨£¬²»¼ÓÕâ¸ö1»á³ö´í
+			//å¯¹å­—ç¬¦ä¸²æŒ‡é’ˆèµ‹å€¼å¿…é¡»ä½¿ç”¨strcpy_s, vs2013ä½¿ç”¨strcpyç¼–è¯‘é€šä¸è¿‡
+			//+1åº”è¯¥æ˜¯å› ä¸ºC++å­—ç¬¦ä¸²çš„ç»“å°¾ç¬¦å·ï¼Ÿä¸æ˜¯ç‰¹åˆ«ç¡®å®šï¼Œä¸åŠ è¿™ä¸ª1ä¼šå‡ºé”™
 #ifdef _MSC_VER //WIN32
 			strcpy_s(value, strlen(buffer) + 1, buffer);
 #elif __GNUC__
@@ -189,14 +189,14 @@ string addEndingChar(char *value){
 }
 
 ///-------------------------------------------------------------------------------------
-///C++µÄ»Øµ÷º¯Êı½«Êı¾İ±£´æµ½¶ÓÁĞÖĞ
+///C++çš„å›è°ƒå‡½æ•°å°†æ•°æ®ä¿å­˜åˆ°é˜Ÿåˆ—ä¸­
 ///-------------------------------------------------------------------------------------
 
 void TraderApi::OnDisconnected(uint64_t session_id, int reason)
 {
 	Task* task = new Task();
 	task->task_name = ONDISCONNECTED;
-	task->addtional_int = session_id;		//ÊÖ¶¯ĞŞ¸Ä
+	task->addtional_int = session_id;		//æ‰‹åŠ¨ä¿®æ”¹
 	task->task_id = reason;
 	this->task_queue.push(task);
 };
@@ -1160,7 +1160,7 @@ void TraderApi::OnQueryOptionCombinedStrategyInfo(XTPQueryCombineStrategyInfoRsp
 }
 
 ///-------------------------------------------------------------------------------------
-///¹¤×÷Ïß³Ì´Ó¶ÓÁĞÖĞÈ¡³öÊı¾İ£¬×ª»¯Îªpython¶ÔÏóºó£¬½øĞĞÍÆËÍ
+///å·¥ä½œçº¿ç¨‹ä»é˜Ÿåˆ—ä¸­å–å‡ºæ•°æ®ï¼Œè½¬åŒ–ä¸ºpythonå¯¹è±¡åï¼Œè¿›è¡Œæ¨é€
 ///-------------------------------------------------------------------------------------
 
 void TraderApi::processTask()
@@ -1697,7 +1697,7 @@ void TraderApi::processQueryPosition(Task *task)
 		XTPQueryStkPositionRsp *task_data = (XTPQueryStkPositionRsp*)task->task_data;
 		data["ticker"] = addEndingChar(task_data->ticker);
 		data["ticker_name"] = addEndingChar(task_data->ticker_name);
-		data["market"] = int(task_data->market);	//ÊÖ¶¯ĞŞ¸Ä
+		data["market"] = int(task_data->market);	//æ‰‹åŠ¨ä¿®æ”¹
 		data["total_qty"] = task_data->total_qty;
 		data["sellable_qty"] = task_data->sellable_qty;
 		data["avg_price"] = task_data->avg_price;
@@ -2801,12 +2801,12 @@ void TraderApi::processCancelOptionCombinedOrderError(Task *task) {
 
 
 ///-------------------------------------------------------------------------------------
-///Ö÷¶¯º¯Êı
+///ä¸»åŠ¨å‡½æ•°
 ///-------------------------------------------------------------------------------------
 
-void TraderApi::createTraderApi(uint8_t clientid, string path, int log_level)
+void TraderApi::createTraderApi(uint8_t clientid, char * path, int log_level)
 {
-	this->api = XTP::API::TraderApi::CreateTraderApi(clientid, path.c_str(),(XTP_LOG_LEVEL)log_level);
+	this->api = XTP::API::TraderApi::CreateTraderApi(clientid, path, (XTP_LOG_LEVEL)log_level);
 	this->api->RegisterSpi(this);
 };
 
@@ -2817,7 +2817,7 @@ void TraderApi::release()
 
 int TraderApi::exit()
 {
-	//¸Ãº¯ÊıÔÚÔ­ÉúAPIÀïÃ»ÓĞ£¬ÓÃÓÚ°²È«ÍË³öAPIÓÃ£¬Ô­ÉúµÄjoinËÆºõ²»Ì«ÎÈ¶¨
+	//è¯¥å‡½æ•°åœ¨åŸç”ŸAPIé‡Œæ²¡æœ‰ï¼Œç”¨äºå®‰å…¨é€€å‡ºAPIç”¨ï¼ŒåŸç”Ÿçš„joinä¼¼ä¹ä¸å¤ªç¨³å®š
 	this->api->RegisterSpi(NULL);
 	this->api->Release();
 	this->api = NULL;
@@ -3373,7 +3373,7 @@ uint64_t TraderApi::cancelOptionCombinedOrder(const uint64_t order_xtp_id, uint6
 }
 
 ///-------------------------------------------------------------------------------------
-///Boost.Python·â×°
+///Boost.Pythonå°è£…
 ///-------------------------------------------------------------------------------------
 
 struct TraderApiWrap : TraderApi, wrapper < TraderApi >
@@ -3840,7 +3840,7 @@ struct TraderApiWrap : TraderApi, wrapper < TraderApi >
 
 BOOST_PYTHON_MODULE(vnxtptrader)
 {
-	PyEval_InitThreads();	//µ¼ÈëÊ±ÔËĞĞ£¬±£Ö¤ÏÈ´´½¨GIL
+	PyEval_InitThreads();	//å¯¼å…¥æ—¶è¿è¡Œï¼Œä¿è¯å…ˆåˆ›å»ºGIL
 
 	class_<TraderApiWrap, boost::noncopyable>("TraderApi")
 		.def("createTraderApi", &TraderApiWrap::createTraderApi)
