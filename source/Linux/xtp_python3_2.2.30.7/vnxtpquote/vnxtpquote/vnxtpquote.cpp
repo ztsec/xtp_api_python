@@ -1,21 +1,21 @@
-// vnctpmd.cpp : ¶¨Òå DLL Ó¦ÓÃ³ÌĞòµÄµ¼³öº¯Êı¡£
+// vnctpmd.cpp : å®šä¹‰ DLL åº”ç”¨ç¨‹åºçš„å¯¼å‡ºå‡½æ•°ã€‚
 //
 //#include "stdafx.h"
 #include "vnxtpquote.h"
 
 ///-------------------------------------------------------------------------------------
-///´ÓPython¶ÔÏóµ½C++ÀàĞÍ×ª»»ÓÃµÄº¯Êı
+///ä»Pythonå¯¹è±¡åˆ°C++ç±»å‹è½¬æ¢ç”¨çš„å‡½æ•°
 ///-------------------------------------------------------------------------------------
 
 void getInt(dict d, string key, int *value)
 {
-	if (d.has_key(key))		//¼ì²é×ÖµäÖĞÊÇ·ñ´æÔÚ¸Ã¼üÖµ
+	if (d.has_key(key))		//æ£€æŸ¥å­—å…¸ä¸­æ˜¯å¦å­˜åœ¨è¯¥é”®å€¼
 	{
-		object o = d[key];	//»ñÈ¡¸Ã¼üÖµ
-		extract<int> x(o);	//´´½¨ÌáÈ¡Æ÷
-		if (x.check())		//Èç¹û¿ÉÒÔÌáÈ¡
+		object o = d[key];	//è·å–è¯¥é”®å€¼
+		extract<int> x(o);	//åˆ›å»ºæå–å™¨
+		if (x.check())		//å¦‚æœå¯ä»¥æå–
 		{
-			*value = x();	//¶ÔÄ¿±êÕûÊıÖ¸Õë¸³Öµ
+			*value = x();	//å¯¹ç›®æ ‡æ•´æ•°æŒ‡é’ˆèµ‹å€¼
 		}
 	}
 };
@@ -43,8 +43,8 @@ void getStr(dict d, string key, char *value)
 		{
 			string s = x();
 			const char *buffer = s.c_str();
-			//¶Ô×Ö·û´®Ö¸Õë¸³Öµ±ØĞëÊ¹ÓÃstrcpy_s, vs2013Ê¹ÓÃstrcpy±àÒëÍ¨²»¹ı
-			//+1Ó¦¸ÃÊÇÒòÎªC++×Ö·û´®µÄ½áÎ²·ûºÅ£¿²»ÊÇÌØ±ğÈ·¶¨£¬²»¼ÓÕâ¸ö1»á³ö´í
+			//å¯¹å­—ç¬¦ä¸²æŒ‡é’ˆèµ‹å€¼å¿…é¡»ä½¿ç”¨strcpy_s, vs2013ä½¿ç”¨strcpyç¼–è¯‘é€šä¸è¿‡
+			//+1åº”è¯¥æ˜¯å› ä¸ºC++å­—ç¬¦ä¸²çš„ç»“å°¾ç¬¦å·ï¼Ÿä¸æ˜¯ç‰¹åˆ«ç¡®å®šï¼Œä¸åŠ è¿™ä¸ª1ä¼šå‡ºé”™
 #ifdef _MSC_VER //WIN32
 			strcpy_s(value, strlen(buffer) + 1, buffer);
 #elif __GNUC__
@@ -75,7 +75,7 @@ string addEndingChar(char *value){
 }
 
 ///-------------------------------------------------------------------------------------
-///C++µÄ»Øµ÷º¯Êı½«Êı¾İ±£´æµ½¶ÓÁĞÖĞ
+///C++çš„å›è°ƒå‡½æ•°å°†æ•°æ®ä¿å­˜åˆ°é˜Ÿåˆ—ä¸­
 ///-------------------------------------------------------------------------------------
 
 void QuoteApi::OnDisconnected(int reason)
@@ -559,7 +559,7 @@ void QuoteApi::OnUnSubscribeAllOptionTickByTick(XTP_EXCHANGE_TYPE exchage_id, XT
 	this->task_queue.push(task);
 };
 ///-------------------------------------------------------------------------------------
-///¹¤×÷Ïß³Ì´Ó¶ÓÁĞÖĞÈ¡³öÊı¾İ£¬×ª»¯Îªpython¶ÔÏóºó£¬½øĞĞÍÆËÍ
+///å·¥ä½œçº¿ç¨‹ä»é˜Ÿåˆ—ä¸­å–å‡ºæ•°æ®ï¼Œè½¬åŒ–ä¸ºpythonå¯¹è±¡åï¼Œè¿›è¡Œæ¨é€
 ///-------------------------------------------------------------------------------------
 
 void QuoteApi::processTask()
@@ -1214,7 +1214,7 @@ void QuoteApi::processQueryAllTickers(Task *task)
 {
     PyLock lock;
 
-		//ÊÖ¶¯ĞŞ¸Ä
+		//æ‰‹åŠ¨ä¿®æ”¹
 		dict data;
 		if (task->task_data)
 		{
@@ -1250,7 +1250,7 @@ void QuoteApi::processQueryTickersPriceInfo(Task *task)
 {
 	PyLock lock;
 
-	//ÊÖ¶¯ĞŞ¸Ä
+	//æ‰‹åŠ¨ä¿®æ”¹
 	dict data;
 	if (task->task_data)
 	{
@@ -1379,7 +1379,7 @@ void QuoteApi::processUnSubscribeAllOptionTickByTick(Task *task)
 void QuoteApi::processQueryAllTickersFullInfo(Task* task) {
 	PyLock lock;
 
-	//ÊÖ¶¯ĞŞ¸Ä
+	//æ‰‹åŠ¨ä¿®æ”¹
 	dict data;
 	if (task->task_data)
 	{
@@ -1425,11 +1425,13 @@ void QuoteApi::processQueryAllTickersFullInfo(Task* task) {
 	}
 
 	this->onQueryAllTickersFullInfo(data, error, task->task_last);
+	
+	delete task;
 }
 
 
 ///-------------------------------------------------------------------------------------
-///Ö÷¶¯º¯Êı
+///ä¸»åŠ¨å‡½æ•°
 ///-------------------------------------------------------------------------------------
 
 void QuoteApi::createQuoteApi(int clientid, string path, int log_level)
@@ -1445,7 +1447,7 @@ void QuoteApi::release()
 
 int QuoteApi::exit()
 {
-	//¸Ãº¯ÊıÔÚÔ­ÉúAPIÀïÃ»ÓĞ£¬ÓÃÓÚ°²È«ÍË³öAPIÓÃ£¬Ô­ÉúµÄjoinËÆºõ²»Ì«ÎÈ¶¨
+	//è¯¥å‡½æ•°åœ¨åŸç”ŸAPIé‡Œæ²¡æœ‰ï¼Œç”¨äºå®‰å…¨é€€å‡ºAPIç”¨ï¼ŒåŸç”Ÿçš„joinä¼¼ä¹ä¸å¤ªç¨³å®š
 	this->api->RegisterSpi(NULL);
 	this->api->Release();
 	this->api = NULL;
@@ -1788,7 +1790,7 @@ int QuoteApi::unSubscribeAllOptionTickByTick(int exchange)
 };
 
 ///-------------------------------------------------------------------------------------
-///Boost.Python·â×°
+///Boost.Pythonå°è£…
 ///-------------------------------------------------------------------------------------
 
 struct QuoteApiWrap : QuoteApi, wrapper < QuoteApi >
@@ -2110,7 +2112,7 @@ struct QuoteApiWrap : QuoteApi, wrapper < QuoteApi >
 
 BOOST_PYTHON_MODULE(vnxtpquote)
 {
-	PyEval_InitThreads();	//µ¼ÈëÊ±ÔËĞĞ£¬±£Ö¤ÏÈ´´½¨GIL
+	PyEval_InitThreads();	//å¯¼å…¥æ—¶è¿è¡Œï¼Œä¿è¯å…ˆåˆ›å»ºGIL
 
 	class_<QuoteApiWrap, boost::noncopyable>("QuoteApi")
 		.def("createQuoteApi", &QuoteApiWrap::createQuoteApi)
