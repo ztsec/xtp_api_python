@@ -1,0 +1,87 @@
+version 2.2.33.5
+（1）修复bug
+
+version 2.2.33.4
+（1）修复bug
+
+version 2.2.33.3
+（1）QuoteSpi新增与行情回补服务器断开的回调函数 OnRebuildQuoteServerDisconnected()
+（2）QuoteSpi新增回补请求应答OnRequestRebuildQuote()
+（3）QuoteSpi新增逐笔数据回补响应函数OnRebuildTickByTick()
+（4）QuoteSpi新增快照数据回补响应函数OnRebuildMarketData()
+（5）QuoteApi新增登陆回补行情服务器请求函数LoginToRebuildQuoteServer()
+（6）QuoteApi新增登出回补行情服务器请求函数LogoutFromRebuildQuoteServer()
+（7）QuoteApi新增请求回补指定行情接口函数RequestRebuildQuote()
+
+version 2.2.33.2
+（1）TradeAPI新增预先获取订单的xtp_id接口GetANewOrderXTPID() 
+（2）TradeAPI新增预设xtpid的报单接口InsertOrderExtra()
+（3）TradeAPI新增预设xtpid的组合策略期权报单接口InsertOptionCombinedOrderExtra()
+
+version 2.2.33.1
+（1）债券额外数据结构体XTPMarketDataBondExData中新增匹配成交最近价(SZ)match_lastpx 、债券加权平均价格(SH)ma_bond_price，当日均价avg_price变成保留字段
+（2）成交类型TXTPTradeTypeType新增枚举值：港市资金成交XTP_TRDT_HK_MKT_CASH、非沪深资金成交XTP_TRDT_NON_SHSZ_MKT_CASH
+
+version 2.2.32.6
+（1）查询持仓结构体XTPQueryStkPositionRsp中新增持仓市值market_value字段
+
+version 2.2.32.4
+（1）TradeAPI库新增策略中指定证券的执行状态通知接口OnStrategySymbolStateReport()
+
+version 2.2.32.2
+（1）修复bug
+
+version 2.2.32.1
+（1）行情快照结构体XTPMD中新增行情快照数据类型data_type_v2，以便更详细区分各种快照数据
+（2）行情快照结构体XTPMD的联合体中新增债券额外信息结构体XTPMarketDataBondExData
+
+version 2.2.31.2
+（1）逐笔信息结构体XTPTBT的联合体中新增逐笔状态订单结构体XTPTickByTickStatus，为后续交易所行情数据升级做准备
+（2）逐笔类型XTP_TBT_TYPE新增枚举类型 XTP_TBT_STATE 状态订单
+
+version 2.2.31.1
+（1）TradeAPI新增新版根据报单ID查询普通报单接口QueryOrderByXTPIDEx()
+（2）TradeAPI新增新版查询普通报单接口QueryOrdersEx()
+（3）TradeAPI新增新版查询未完结普通报单接口QueryUnfinishedOrdersEx()
+（4）TradeAPI新增新版查询普通报单相关接口对应的回调函数接口OnQueryOrderEx()，为用户提供更丰富的查询信息，例如拒单原因
+（5）TradeAPI新增新版分页查询普通报单接口QueryOrdersByPageEx()
+（6）TradeAPI新增新版分页查询普通报单接口对应的回调函数接口OnQueryOrderByPageEx()，为用户提供更丰富的查询信息，例如拒单原因
+（7）TradeAPI新增新版查询组合策略期权报单接口QueryOptionCombinedOrdersEx()
+（8）TradeAPI新增新版根据报单ID查询组合策略期权报单接口QueryOptionCombinedOrderByXTPIDEx()
+（9）TradeAPI新增新版查询组合策略期权未完结报单接口QueryOptionCombinedUnfinishedOrdersEx()
+（10）TradeAPI新增新版查询组合策略期权报单相关接口对应的回调函数接口OnQueryOptionCombinedOrdersEx()，为用户提供更丰富的查询信息，例如拒单原因
+（11）TradeAPI新增新版分页查询组合策略期权报单接口QueryOptionCombinedOrdersByPageEx()
+（12）TradeAPI新增新版分页查询组合策略期权报单接口对应的回调函数接口OnQueryOptionCombinedOrdersByPageEx()，为用户提供更丰富的查询信息，例如拒单原因
+
+version 2.2.30.6
+（1）XTP_SECURITY_TYPE 新增 XTP_SECURITY_ETF_CROSS_BORDER_STOCK 跨境ETF类型
+（2）XTP新增跨境ETF的买卖业务（申赎业务暂不支持）
+
+version 2.2.30.5
+（1）修复QuoteAPI在UDP连接中使用单订阅函数订阅行情且最后一个是无效订阅时，无法正确建立UDP连接的bug
+
+version 2.2.30.3
+（1）查询持仓结构体XTPQueryStkPositionRsp中新增持仓类型position_security_type字段，用户可以用此字段区分持仓是否为配股配债类型
+
+version 2.2.30.2
+（1）QuoteAPI新增设定接收线程绑核CPU集接口SetUDPRecvThreadAffinityArray，最多支持4个核，具体使用的核数视实际情况而定
+（2）QuoteAPI新增设定解析线程绑核CPU集接口SetUDPParseThreadAffinityArray，最多支持4个核，具体使用的核数视实际情况而定
+（3）QuoteAPI原有的SetUDPRecvThreadAffinity和SetUDPParseThreadAffinity弃用，为了兼容性还保留，但不建议使用
+（4）QuoteAPI中SetUDPBufferSize()可以设置比以前小一些了，QuoteAPI占用的内存总体可能比以前大了
+（5）逐笔委托结构体XTPTickByTickEntrust中新增原始订单号order_no字段，并针对上海逐笔委托数据增加部分说明
+（6）行情全量静态信息结构体XTPQuoteFullInfo中新增证券状态security_status字段，用于区分风险警示板和退市整理板
+
+version 2.2.27.6
+（1）QuoteAPI修复bug - 全订阅/全取消订阅期权数据时，无法正确回调全订阅/全取消订阅响应函数
+（2）查询资金响应结构体XTPQueryAssetRsp中新增2个期权账户专用字段（期权服务器版本后续即将支持，以服务器版本为准）：交易所实时风险度exchange_cur_risk_degree 和 公司实时风险度company_cur_risk_degree
+
+version 2.2.27.5
+（1）XTPStrategyStateReportStruct结构体新增2个参数：m_strategy_unclosed_qty 策略未平仓数量(T0卖出数量-买入数量) 和 m_strategy_asset_diff 策略执行绩效(T0资金预净收入)
+（2）TraderApi新增查询其他服务器节点可用资金接口 QueryOtherServerFund()
+（3）TraderSpi新增查询其他服务器节点可用资金响应接口 OnQueryOtherServerFund()
+
+version 2.2.27.4
+（1）ALGOUserEstablishChannel()接口参数中减少硬件信息相关参数输入
+（2）去除CreateStrategy、CancelStrategy、StartStrategy、StopStrategy、DestroyStrategy以及对应的Spi回调接口
+（3）新增InsertAlgoOrder() 、CancelAlgoOrder() 2个接口以及对应的Spi回调接口，替代（2）中提到的5个接口
+
