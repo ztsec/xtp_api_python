@@ -135,7 +135,7 @@ struct Task
 	int64_t addtional_int_four;		//补充整数字段
 
 	int64_t req_count;
-	int64_t order_sequence; 
+	int64_t order_sequence;
 	int64_t query_reference;
 	int64_t trade_sequence;
 
@@ -152,7 +152,7 @@ class ConcurrentQueue
 {
 private:
 	queue<Data> the_queue;								//标准库队列
-	mutable mutex the_mutex;							//boost互斥锁
+	mutable boost::mutex the_mutex;							//boost互斥锁
 	condition_variable the_condition_variable;			//boost条件变量
 
 public:
@@ -160,7 +160,7 @@ public:
 	//存入新的任务
 	void push(Data const& data)
 	{
-		mutex::scoped_lock lock(the_mutex);				//获取互斥锁
+		boost::mutex::scoped_lock lock(the_mutex);				//获取互斥锁
 		the_queue.push(data);							//向队列中存入数据
 		lock.unlock();									//释放锁
 		the_condition_variable.notify_one();			//通知正在阻塞等待的线程
@@ -169,14 +169,14 @@ public:
 	//检查队列是否为空
 	bool empty() const
 	{
-		mutex::scoped_lock lock(the_mutex);
+		boost::mutex::scoped_lock lock(the_mutex);
 		return the_queue.empty();
 	}
 
 	//取出
 	Data wait_and_pop()
 	{
-		mutex::scoped_lock lock(the_mutex);
+		boost::mutex::scoped_lock lock(the_mutex);
 
 		while (the_queue.empty())						//当队列为空时
 		{
@@ -910,7 +910,7 @@ public:
 	virtual void onQueryOrderByPageEx(dict data, int64_t req_count, int64_t order_sequence, int64_t query_reference, int reqid, bool last, uint64_t session) {};
 
 	virtual void onQueryTradeByPage(dict data, int64_t req_count, int64_t trade_sequence, int64_t query_reference, int reqid, bool last, uint64_t session) {};
-	
+
 	virtual void onCreditCashRepayDebtInterestFee(dict data, dict error_info, uint64_t session) {};
 
 
@@ -946,7 +946,7 @@ public:
 	//////////////algo////////
 
 	virtual void onQueryStrategy(dict data, string strategy_param, dict error_info, int32_t request_id, bool is_last, uint64_t session_id){};
-	
+
 	virtual void onStrategyStateReport(dict data,  uint64_t session_id){};
 
 	virtual void onALGOUserEstablishChannel(string user,dict error_info, uint64_t session_id){};
@@ -1009,7 +1009,7 @@ public:
 	int queryOrderByXTPIDEx(uint64_t orderid, uint64_t sessionid, int reqid);
 
 	int queryOrders(dict req, uint64_t sessionid, int reqid);
-	
+
 	int queryOrdersEx(dict req, uint64_t sessionid, int reqid);
 
 	int queryUnfinishedOrders(uint64_t sessionid, int reqid);
@@ -1115,7 +1115,7 @@ public:
 	int queryOtherServerFund(dict req, uint64_t session_id, int request_id);
 
 	/////////////////////algo///////////////////////
-	
+
 	int loginALGO(string ip, int port, string user, string password, int socktype,string local_ip);
 
 	int queryStrategy(uint32_t strategy_type, uint64_t client_strategy_id, uint64_t xtp_strategy_id, uint64_t session_id, int32_t request_id);
