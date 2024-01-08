@@ -1,0 +1,51 @@
+{
+  "client_id": 1,
+  "path": "./",
+  "path_linux": "./",
+  "account_key":"xxxxxxxx",
+  "account": [
+    {
+      "user": "tradeusername",
+      "password": "tradepw"
+    }
+  ],
+  "trade_port": 6001,
+  "trade_ip": "XXX.XXX.XXX.XXX",
+  "auto_save": true,
+  "resume_type": 2,
+  "order": [
+    {
+      "instrument_id": "600090",
+      "exchange": 2,
+      "price": 7.0,
+      "quantity": 200,
+      "side": 1,
+      "price_type": 1,
+	  "business_type":0,
+	  "position_effect":0
+    }
+  ],
+  "ping_pong_test": false,
+  "quote_ip": "XXX.XXX.XXX.XXX",
+  "quote_port": 6002,
+  "quote_user": "quoteusername",
+  "quote_password": "quotepw",
+  "quote_ticker": {
+    "instrument": [
+      "600120"
+    ],
+    "exchange": 1
+  },
+  "hb_interval":15,
+  "quote_buffer_size":256,
+  "quote_protocol":1,
+  "account_algo": "XXXXX",
+  "password_algo": "XXXXXX",
+  "ip_algo": "XXX.XXX.XXX.XXX",
+  "port_algo": 0,
+  "strategy": {
+    "client_id": 1,
+    "type": 1001,
+    "param": "test param"
+  }
+}

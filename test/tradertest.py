@@ -543,6 +543,7 @@ class TestApi(TraderApi):
         print("data['market']:",data['market'])#交易市场
         print("data['ticker']:",data['ticker'])#申购代码
         print("data['ticker_name']:",data['ticker_name'])#申购股票名称
+        print("data['ticker_type']:",data['ticker_type'])#证券类别
         print("data['price']:",data['price'])#申购价格
         print("data['unit']:",data['unit'])#申购单元
         print("data['qty_upper_limit']:",data['qty_upper_limit'])#最大允许申购数量
@@ -556,11 +557,53 @@ class TestApi(TraderApi):
     #@param last 此消息响应函数是否为reid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
     #@param session_id 资金账户对应的session_id，登录时得到
     #@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
-    def onQueryIPOQuotaInfo(self, data, error, reid, last,session_id):
+    def onQueryIPOQuotaInfo(self, data, error, reqid, last,session_id):
         """"""
         printFuncName('onQueryIPOQuotaInfo', data, error, reqid, last,session_id)
         print("data['market']:",data['market'])#交易市场
         print("data['quantity']:",data['quantity'])#可申购额度
+        print("data['tech_quantity']:",data['tech_quantity'])#上海科创板额度       
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
+
+	#请求查询今日可转债申购信息列表的响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+	#@param ipo_info 查询到的今日可转债申购的一只可转债信息
+	#@param error_info 查询今日可转债申购信息列表发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param request_id 此消息响应函数对应的请求ID
+	#@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onQueryBondIPOInfoList(self, data, error, reqid, last,session_id):
+        """"""
+        printFuncName('onQueryBondIPOInfoList', data, error, reqid, last,session_id)
+        print("data['market']:",data['market'])#交易市场
+        print("data['ticker']:",data['ticker'])#申购代码
+        print("data['ticker_name']:",data['ticker_name'])#申购股票名称
+        print("data['ticker_type']:",data['ticker_type'])#证券类别
+        print("data['price']:",data['price'])#申购价格
+        print("data['unit']:",data['unit'])#申购单元
+        print("data['qty_upper_limit']:",data['qty_upper_limit'])#最大允许申购数量
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
+
+    #请求查询用户可转债转股信息的响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+	#@param swap_stock_info 查询到某条可转债转股信息
+	#@param error_info 查查询可转债转股信息发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param request_id 此消息响应函数对应的请求ID
+	#@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onQueryBondSwapStockInfo(self, data, error, reqid, last, session_id):
+        """"""
+        printFuncName('onQueryBondSwapStockInfo', data, error, reqid, last, session_id)
+        print("data['market']:",data["market"])#交易市场
+        print("data['ticker']:",data["ticker"])#债券证券代码
+        print("data['underlying_ticker']:",data["underlying_ticker"])#转股后的股票证券代码
+        print("data['unit']:",data["unit"])#转换数量单位（张）
+        print("data['qty_min']:",data["qty_min"])#最小下单量（张）
+        print("data['qty_max']:",data["qty_max"])#最大下单量（张）
+        print("data['swap_price']:",data["swap_price"])#转股价格
+        print("data['swap_flag']:",data["swap_flag"])#是否处于转股期；0: 不可转股；1：可转股；
         print("error['error_id']:",error['error_id'])
         print("error['error_msg']:",error['error_msg'])
 
@@ -571,7 +614,7 @@ class TestApi(TraderApi):
     #@param last 此消息响应函数是否为reid这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
     #@param session_id 资金账户对应的session_id，登录时得到
     #@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
-    def onQueryOptionAuctionInfo(self, data, error, reid, last,session_id):
+    def onQueryOptionAuctionInfo(self, data, error, reqid, last,session_id):
         """"""
         printFuncName('onQueryOptionAuctionInfo', data, error, reqid, last,session_id)
         print("data['ticker']:",data['ticker'])#合约编码，报单ticker采用本字段
@@ -1151,8 +1194,6 @@ class TestApi(TraderApi):
         for i in data['leg_detail']:
              for key,value in i.items():
                  print(key,value)
-        print("error['error_id']:",error['error_id'])
-        print("error['error_msg']:",error['error_msg'])
 
     #请求查询期权组合策略持仓响应
     #@param position_info 查询到的一个持仓信息
@@ -1176,6 +1217,7 @@ class TestApi(TraderApi):
         for i in data['leg_detail']:
              for key,value in i.items():
                  print(key,value)
+        print("data['secu_comb_margin']:",data['secu_comb_margin'])#组合占用保证金（公司）
         print("error['error_id']:",error['error_id'])
         print("error['error_msg']:",error['error_msg'])
 
@@ -1209,9 +1251,9 @@ class TestApi(TraderApi):
     #@param last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
     #@param session_id 资金账户对应的session_id，登录时得到
     #@remark 一个查询请求可能对应多个响应，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线。
-    def onQueryOptionCombinedExecPositio(self, data, error, reqid, last,session_id):
+    def onQueryOptionCombinedExecPosition(self, data, error, reqid, last,session_id):
         """"""
-        printFuncName('onQueryOptionCombinedExecPositio', data, error, reqid, last,session_id)
+        printFuncName('onQueryOptionCombinedExecPosition', data, error, reqid, last,session_id)
         print("data['market']:",data['market'])#市场
         print("data['cntrt_code_1']:",data['cntrt_code_1'])#成分合约1代码
         print("data['cntrt_name_1']:",data['cntrt_name_1'])#成分合约1名称
@@ -1379,8 +1421,57 @@ class TestApi(TraderApi):
         print("data['m_strategy_price_diff']:",data['m_strategy_price_diff'])#策略执行价差(T0时为毛增强收益率)
         print("data['error_id']:",data['error_id'])#错误信息
         print("data['error_msg']:",data['error_msg'])#错误信息
-        
-        
+    
+	#algo业务中报送母单创建时的推送消息(包括其他客户端创建的母单)
+	#@param strategy_info 策略具体信息
+	#@param strategy_param 此策略中包含的参数
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onNewStrategyCreateReport(self, data, strategy_param, session_id):
+        """"""
+        printFuncName('onNewStrategyCreateReport', data, strategy_param, session_id)
+        print("data['m_strategy_type']:",data['m_strategy_type'])#策略类型
+        print("data['m_strategy_state']:",data['m_strategy_state'])#策略状态 0-创建中,1-已创建,2-开始执行中,3-已执行,4-停止中,5-已停止,6-销毁中,7-已销毁,8-发生错误,
+        print("data['m_client_strategy_id']:",data['m_client_strategy_id'])#客户策略id
+        print("data['m_xtp_strategy_id']:",data['m_xtp_strategy_id'])#xtp策略id
+
+	#algo业务中算法推荐的响应
+	#@param basket_flag 是否将满足条件的推荐结果打包成母单篮的标志，与请求一致，如果此参数为true，那么请以返回的strategy_param为准
+	#@param recommendation_info 推荐算法的具体信息，当basket_flag=true时，此结构体中的market和ticker将没有意义，此时请以strategy_param为准
+	#@param strategy_param 算法参数，可直接用来创建母单，如果error_info.error_id为0时，有意义
+	#@param error_info 请求推荐算法发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param request_id 此消息响应函数对应的请求ID
+	#@param is_last 此消息响应函数是否为request_id这条请求所对应的最后一个响应，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onStrategyRecommendation(self, addtional_bool, data, strategy_param, error, reqid, last, session_id):
+        """"""
+        printFuncName('onStrategyRecommendation', addtional_bool, data, strategy_param, error, reqid, last, session_id)
+        print("data['addtional_bool']:", addtional_bool)#是否将满足条件的推荐结果打包成母单篮的标志
+        print("data['strategy_param']:",strategy_param)#算法参数
+        print("data['m_strategy_type']:",data['m_strategy_type'])#策略类型
+        print("data['m_market']:",data['m_market'])#交易市场
+        print("data['m_ticker']:",data['m_ticker'])#证券代码
+        print("data['m_reserved']:",data['m_reserved'])#保留域     
+        print("error['error_id']:",error['error_id'])#错误信息
+        print("error['error_msg']:",error['error_msg'])#错误信息
+
+	#algo业务中修改已有策略单的响应
+	#@param strategy_info 用户修改后策略单的具体信息
+	#@param error_info 修改策略单发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onModifyAlgoOrder(self, data, error, session_id):
+        """"""
+        printFuncName('onModifyAlgoOrder', 1)
+        printFuncName('onModifyAlgoOrder', data, error, session_id)
+        print("data['m_strategy_type']:",data['m_strategy_type'])#策略类型
+        print("data['m_strategy_state']:",data['m_strategy_state'])#策略状态 0-创建中,1-已创建,2-开始执行中,3-已执行,4-停止中,5-已停止,6-销毁中,7-已销毁,8-发生错误,
+        print("data['m_client_strategy_id']:",data['m_client_strategy_id'])#客户策略id
+        print("data['m_xtp_strategy_id']:",data['m_xtp_strategy_id'])#xtp策略id
+        print("error['error_id']:",error['error_id'])#错误信息
+        print("error['error_msg']:",error['error_msg'])#错误信息
+    
 
 if __name__ == '__main__':
     ip = '122.112.139.0'
@@ -1388,7 +1479,7 @@ if __name__ == '__main__':
     user = 'username'
     password = 'password'
     reqid = 0
-    local_ip = '10.25.0.0'
+    local_ip = '10.25.61.57'
 
     #创建TraderApi
     #@param client_id （必须输入）客户端id，用于区分同一用户的不同客户端，由用户自定义
@@ -1419,6 +1510,11 @@ if __name__ == '__main__':
     #@remark 此函数必须在Login之前调用，标识的是客户端版本号，而不是API的版本号，由用户自定义
     api.setSoftwareVersion("test")
 
+    #设置心跳检测时间间隔，单位为秒
+	#@param interval 心跳检测时间间隔，单位为秒
+	#@remark 此函数必须在Login之前调用
+    setHeartBeatInterval = api.setHeartBeatInterval(15)   
+
     #用户登录请求
     #@return session表明此资金账号登录是否成功，“0”表示登录失败，可以调用GetApiLastError()来获取错误代码，非“0”表示登录成功，此时需要记录下这个返回值session，与登录的资金账户对应
     #@param ip 服务器地址，类似“127.0.0.1”
@@ -1429,8 +1525,11 @@ if __name__ == '__main__':
     #@param local_ip 本地网卡地址，类似“127.0.0.1”
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api可支持多个账户连接，但是同一个账户同一个client_id只能有一个session连接，后面的登录在前一个session存续期间，无法连接
     session_id = api.login(ip, port, user, password, 1,local_ip)
-    printFuncName('login', session_id)
-
+    printFuncName('login', session_id)   
+    if session_id == 0 :
+       retGetApiLastError = api.getApiLastError()
+       printFuncName('getApiLastError', retGetApiLastError)   
+    
     #服务器是否重启过
     #@return “true”表示重启过，“false”表示没有重启过
     #@param session_id 资金账户对应的session_id,登录时得到
@@ -1452,8 +1551,8 @@ if __name__ == '__main__':
     #获取API的系统错误
     #@return 返回的错误信息，可以在Login、InsertOrder、CancelOrder返回值为0时调用，获取失败的原因
     #@remark 可以在调用api接口失败时调用，例如login失败时
-    retGetApiLastError = api.getApiLastError()
-    printFuncName('getApiLastError',retGetApiLastError)
+    #retGetApiLastError = api.getApiLastError()
+    #printFuncName('getApiLastError',retGetApiLastError)
     
     #查询用户在本节点上的可交易市场类型
     #@return 发送消息是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用getApiLastError()来获取错误代码
@@ -1505,14 +1604,39 @@ if __name__ == '__main__':
 
     retInsertOrder = api.insertOrder(order, session_id)
     printFuncName('insertOrder', retInsertOrder)
+    if retInsertOrder == 0 :         
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)   
     
+    #为用户获取一个新的订单XTPID，用于报单
+	#@return 生成的订单XTPID，非“0”表示获取成功，“0”表示获取失败，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@remark 此函数必须在Login之后调用，通过这个函数获取的order_xtp_id仅用于对应的用户报单，如果设置错误，将会导致下单失败
     sleep(2)
     newxtpid = api.getANewOrderXTPID(session_id)
     order['order_xtp_id'] = newxtpid
     retInsertOrder = api.insertOrderExtra(order, session_id)
     printFuncName('insertOrderExtra', retInsertOrder)
-    retGetApiLastError = api.getApiLastError()
-    printFuncName('getApiLastError',retGetApiLastError)
+    if retInsertOrder == 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError',retGetApiLastError)
+
+
+    #通过报单在xtp系统中的ID获取下单的客户端id
+    #@return 返回客户端id，可以用此方法过滤自己下的订单
+    #@param order_xtp_id 报单在xtp系统中的ID
+    #@remark 由于系统允许同一用户在不同客户端上登录操作，每个客户端通过不同的client_id进行区分    
+    order_xtp_id = retInsertOrder
+    retGetClientIdByXTPID = api.getClientIDByXTPID(order_xtp_id)
+    printFuncName('getClientIDByXTPID',retGetClientIdByXTPID)
+
+    #通过报单在xtp系统中的ID获取相关资金账户名
+    #@return 返回资金账户名
+    #@param order_xtp_id 报单在xtp系统中的ID
+    #@remark 只有资金账户登录成功后,才能得到正确的信息
+    retGetAccountByXTPID = api.getAccountByXTPID(order_xtp_id)
+    printFuncName('getAccountByXTPID',retGetAccountByXTPID)
+
     
     #分页请求查询报单
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
@@ -1528,17 +1652,22 @@ if __name__ == '__main__':
     reqid += 1
     retQueryOrdersByPage = api.queryOrdersByPageEx(queryOrderByPageReq, session_id, reqid)
     printFuncName('queryOrdersByPageEx', retQueryOrdersByPage)
-    
+    if retQueryOrdersByPage != 0 :
+        retQueryOrdersByPageError = api.getApiLastError()
+        printFuncName('getApiLastError',retQueryOrdersByPageError)
 
     
-    #报单操作请求
+    #撤单操作请求
     #@return 撤单在XTP系统中的ID,如果为‘0’表示撤单发送失败，此时用户可以调用GetApiLastError()来获取错误代码，非“0”表示撤单发送成功，用户需要记录下返回的order_cancel_xtp_id，它保证一个交易日内唯一，不同的交易日不保证唯一性
     #@param retInsertOrder 需要撤销的委托单在XTP系统中的ID
     #@param session_id 资金账户对应的session,登录时得到
     #@remark 如果撤单成功，会在报单响应函数OnOrderEvent()里返回原单部撤或者全撤的消息，如果不成功，会在OnCancelOrderError()响应函数中返回错误原因
-    #sleep(2)
-    #retCancelOrder = api.cancelOrder(retInsertOrder, session_id)
-    #printFuncName('cancelOrder',retCancelOrder)
+    sleep(2)
+    retCancelOrder = api.cancelOrder(retInsertOrder, session_id)
+    printFuncName('cancelOrder',retCancelOrder)
+    if retCancelOrder == 0 :
+        retCancelOrderError = api.getApiLastError()
+        printFuncName('getApiLastError',retCancelOrderError)
 
     #根据报单ID请求查询报单
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
@@ -1546,9 +1675,12 @@ if __name__ == '__main__':
     #@param session_id 资金账户对应的session，登录时得到
     #@param reqid 用于用户定位查询响应的ID，由用户自定义
     reqid += 1
-    order_xtp_id = 37866085311054826;
+    order_xtp_id = retInsertOrder
     retQueryOrderByXTPID = api.queryOrderByXTPIDEx(order_xtp_id,session_id,reqid)
     printFuncName('queryOrderByXTPIDEx',retQueryOrderByXTPID)
+    if retQueryOrderByXTPID != 0 :
+        retQueryOrderByXTPIDError = api.getApiLastError()
+        printFuncName('getApiLastError',retQueryOrderByXTPIDError)
   
     #请求查询报单
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
@@ -1691,7 +1823,8 @@ if __name__ == '__main__':
     reqid += 1
     retQueryETFTickerBasket = api.queryETFTickerBasket(queryETFInfo,session_id, reqid)
     printFuncName('queryETFTickerBasket',retQueryETFTickerBasket)
-
+    sleep(1)
+  
     #请求查询今日新股申购信息列表
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
     #@param session_id 资金账户对应的session,登录时得到
@@ -1699,7 +1832,8 @@ if __name__ == '__main__':
     reqid += 1
     retQueryIPOInfoList = api.queryIPOInfoList(session_id, reqid)
     printFuncName('queryIPOInfoList',retQueryIPOInfoList)
-
+    sleep(1)
+  
     #请求查询用户新股申购额度信息
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
     #@param session_id 资金账户对应的session_id,登录时得到
@@ -1707,7 +1841,36 @@ if __name__ == '__main__':
     reqid += 1
     retQueryIPOQuotaInfo = api.queryIPOQuotaInfo(session_id, reqid)
     printFuncName('queryIPOQuotaInfo',retQueryIPOQuotaInfo)
-
+    sleep(1)
+  
+    #请求查询今日可转债申购信息列表
+	#@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@param request_id 用于用户定位查询响应的ID，由用户自定义
+    reqid += 1
+    retQueryBondIPOInfoList = api.queryBondIPOInfoList(session_id, reqid)
+    printFuncName('queryBondIPOInfoList', retQueryBondIPOInfoList)
+    if retQueryBondIPOInfoList != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)   
+    sleep(1)
+  
+    #请求查询可转债转股的基本信息
+	#@return 查询是否发送成功，“0”表示发送成功，非“0”表示发送出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param query_param 需要查询的可转债转股信息的筛选条件，可以为NULL（为NULL表示查询所有的可转债转股信息），此参数中合约代码可以为空字符串，如果为空字符串，则查询所有可转债转股信息，如果不为空字符串，请不带空格，并以'\0'结尾，且必须与market匹配
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@param request_id 用于用户定位查询响应的ID，由用户自定义
+    queryBondSwapStockInfo = {}
+    queryBondSwapStockInfo['market'] = 2
+    #queryBondSwapStockInfo['ticker'] = '113641'
+    reqid += 1
+    retQueryBondSwapStockInfo = api.queryBondSwapStockInfo(queryBondSwapStockInfo, session_id, reqid)
+    printFuncName('queryBondSwapStockInfo', retQueryBondSwapStockInfo)
+    if retQueryBondSwapStockInfo != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)   
+    sleep(1)
+  
     #请求查询期权合约
     #@return 查询是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
     #@param query_param 需要查询的期权合约的筛选条件，可以为NULL（为NULL表示查询所有的期权合约）
@@ -1907,9 +2070,9 @@ if __name__ == '__main__':
     #@param request_id 用于用户定位查询响应的ID，由用户自定义
     #@remark 该方法支持分时段查询，如果股票代码为空，则默认查询时间段内的所有报单，否则查询时间段内所有跟股票代码相关的报单，此函数查询出的结果可能对应多个查询结果响应。此函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
     query_option_combined_orders_req = {
-        'comb_num':'',
-        'begin_time': '0',
-        'end_time': '0'
+        #'comb_num':'',
+        #'begin_time': 0,
+        #'end_time': 0
     }
     reqid += 1
     queryOptionCombinedOrders = api.queryOptionCombinedOrders(query_option_combined_orders_req,session_id, reqid)
@@ -1948,8 +2111,8 @@ if __name__ == '__main__':
     #@remark 该方法支持分时段查询，如果股票代码为空，则默认查询时间段内的所有报单，否则查询时间段内所有跟股票代码相关的报单，此函数查询出的结果可能对应多个查询结果响应。此函数不建议轮询使用，当报单量过多时，容易造成用户线路拥堵，导致api断线
     query_option_combined_orders_req = {
         'comb_num':'',
-        'begin_time': '0',
-        'end_time': '0'
+        'begin_time': 0,
+        'end_time': 0
     }
     reqid += 1
     queryOptionCombinedOrders = api.queryOptionCombinedOrdersEx(query_option_combined_orders_req,session_id, reqid)
@@ -1975,7 +2138,7 @@ if __name__ == '__main__':
     #@param session_id 资金账户对应的session_id，登录时得到
     #@param request_id 用于用户定位查询响应的ID，由用户自定义
     reqid += 1
-    queryOptionCombinedUnfinishedOrders = api.QueryOptionCombinedUnfinishedOrdersEx(session_id, reqid)
+    queryOptionCombinedUnfinishedOrders = api.queryOptionCombinedUnfinishedOrdersEx(session_id, reqid)
     printFuncName('queryOptionCombinedUnfinishedOrdersEx',queryOptionCombinedUnfinishedOrders)
 
     
@@ -2026,8 +2189,8 @@ if __name__ == '__main__':
     #@param request_id 用于用户定位查询响应的ID，由用户自定义
     #@remark 该方法如果用户提供了合约代码，则会查询此合约的持仓信息（注意请指定market，如果market为0，可能会查询到2个市场的持仓，如果market为其他非有效值，则查询结果会返回找不到持仓），如果合约代码为空，则默认查询所有持仓信息。
     query_option_combined_position_req = {
-        'combined_security_id': '',
-        'market': '0'
+        'comb_num': '',
+        'market': 0
     }
     reqid += 1
     queryOptionCombinedPosition = api.queryOptionCombinedPosition(query_option_combined_position_req,session_id, reqid)
@@ -2051,7 +2214,7 @@ if __name__ == '__main__':
     query_option_combined_exec_position_req = {
         'cntrt_code_1': '',
         'cntrt_code_2': '',
-        'market': '0'
+        'market': 0
     }
     reqid += 1
     queryOptionCombinedExecPosition = api.queryOptionCombinedExecPosition(query_option_combined_exec_position_req,session_id, reqid)
@@ -2090,6 +2253,9 @@ if __name__ == '__main__':
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api只需调用一次，所有用户共用即可
     algo_session_id = api.loginALGO(algo_ip, algo_port, algo_user, algo_password, 1,algo_local_ip)
     printFuncName('loginALGO', algo_session_id)
+    if algo_session_id != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('loginALGO-getApiLastError', retGetApiLastError)   
     sleep(1)
 
     #用户请求使用algo服务器建立算法通道
@@ -2103,6 +2269,9 @@ if __name__ == '__main__':
     reqid += 1
     aLGOUserEstablishChannel = api.aLGOUserEstablishChannel(ip,port,user,password,session_id)
     printFuncName('aLGOUserEstablishChannel',aLGOUserEstablishChannel)
+    if aLGOUserEstablishChannel != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError-aLGOUserEstablishChannel', retGetApiLastError)   
     sleep(1)
 
     #algo业务中用户报算法单请求
@@ -2113,9 +2282,14 @@ if __name__ == '__main__':
     #@param session_id 资金账户对应的session_id,登录时得到
     #@remark 仅能在用户建立算法通道后使用，算法单的异步通知得
     reqid += 1
-    strategy_param='{"start_time": "09:30:00", "end_time": "15:00:00", "ticker": "600050", "market": "SH", "quantity": 10000, "limit_action": false, "expire_action": false, "price": 17.8, "buy_side": "BUY", "sell_side": "SELL"}'
-    insertAlgoOrder = api.insertAlgoOrder(3106,1,strategy_param,session_id)
+    strategy_type = 5001 
+    strategy_param = '{"start_time": "09:30:00", "end_time": "14:57:00", "buy_side": "BUY", "sell_side": "SELL", "business_type": "CASH", "trade_list": [{"market": "SH", "ticker": "600000", "quantity": 13000}]}'
+    client_strategy_id = 1001
+    insertAlgoOrder = api.insertAlgoOrder(strategy_type,client_strategy_id,strategy_param,session_id)
     printFuncName('insertAlgoOrder',insertAlgoOrder)
+    if insertAlgoOrder != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError-insertAlgoOrder', retGetApiLastError)   
     sleep(1)
     
     
@@ -2140,10 +2314,14 @@ if __name__ == '__main__':
     #@param session_id 资金账户对应的session_id,登录时得到
     #@remark 仅能在用户建立算法通道后调用
     reqid += 1
+    xtp_strategy_id = 1894408323075
     cancelAlgoOrder = api.cancelAlgoOrder(0,xtp_strategy_id,session_id)
     printFuncName('cancelAlgoOrder',cancelAlgoOrder)
+    if cancelAlgoOrder != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)   
     sleep(1)
-
+  
     #获取算法单的母单ID
     #@return 返回算法单的母单ID，如果返回为0表示不是算法单
     #@param order_xtp_id 算法单对应的xtp id
@@ -2155,7 +2333,39 @@ if __name__ == '__main__':
     getAlgorithmIDByOrder = api.getAlgorithmIDByOrder(order_xtp_id,order_client_id)
     printFuncName('getAlgorithmIDByOrder',getAlgorithmIDByOrder)
     
-
+    sleep(1)
+	#algo业务中请求推荐算法
+	#@return 请求发送是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param basket_flag 是否将满足条件的推荐结果打包成母单篮的标志，true-打包
+	#@param basket_param 需要算法推荐的证券列表，为json字串，具体格式参考说明文档或咨询运营人员
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@param request_id 用于用户定位查询响应的ID，由用户自定义
+	#@remark 此条请求可能对应多条回应消息，此功能上线时间视服务器后台支持情况而定，具体以运营通知时间为准
+    reqid += 1
+    basket_flag = True
+    #有回调的算法推荐
+    basket_param = "{\"symbol_list\": [{\"ticker\": \"000001\", \"market\": \"SZ\", \"strategy_category\": \"ALGO\", \"quantity\": 10000, \"side\": \"BUY\"}]}"
+    #无回调的算法推荐
+    #basket_param = "{\"symbol_list\": [{\"ticker\": \"000001\", \"market\": \"SZ\", \"strategy_category\": \"T0\", \"quantity\": 10000}]}"
+    strategyRecommendation = api.strategyRecommendation(basket_flag, basket_param, session_id, reqid)
+    printFuncName('strategyRecommendation', strategyRecommendation)
+    
+    sleep(1)
+	#algo业务中修改已有的算法单
+	#@return 算法单修改请求发送是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param xtp_strategy_id xtp算法单策略ID
+	#@param strategy_param 修改后的策略参数
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@remark 仅能在用户建立算法通道后使用，此功能上线时间视服务器后台支持情况而定，具体以运营通知时间为准
+    reqid += 1
+    xtp_strategy_id = 1894408323073
+    strategy_param = "{\"start_time\": \"09:30:00\", \"end_time\": \"14:55:00\", \"buy_side\": \"BUY\", \"sell_side\": \"SELL\", \"business_type\": \"CASH\", \"trade_list\": [{\"market\": \"SH\", \"ticker\": \"600000\", \"quantity\": 3000}]}"
+    modifyAlgoOrder = api.modifyAlgoOrder(xtp_strategy_id, strategy_param, session_id)
+    printFuncName('modifyAlgoOrder', modifyAlgoOrder)
+    if modifyAlgoOrder != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)  
+   
     #sleep为了删除接口对象前将回调数据输出，不sleep直接删除回调对象会自动析构，无法返回回调的数据
     sleep(5)
    
@@ -2170,8 +2380,8 @@ if __name__ == '__main__':
     #release = api.release()
     #printFuncName('release', release)
 
-    #exit = api.exit()
-    #printFuncName('exit', exit)
+    exit = api.exit()
+    printFuncName('exit', exit)
     
     
 

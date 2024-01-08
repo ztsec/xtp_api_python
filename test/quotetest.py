@@ -31,6 +31,14 @@ class TestApi(QuoteApi):
         """"""
         printFuncName('onError',data)
 
+    #逐笔丢包应答
+	#@param begin_seq 当逐笔出现丢包时，丢包区间下限（可能与上限一致）
+	#@param end_seq 当逐笔出现丢包时，丢包区间上限（可能与下限一致）
+	#@remark 此函数只有在逐笔发生丢包时才会有调用，如果丢包的上下限一致，表示仅丢失了一个包，注意此包仅为数据包，包含1个或者多个逐笔数据
+    def onTickByTickLossRange(self, begin_seq, end_seq):
+        """"""
+        printFuncName('onTickByTickLossRange',begin_seq, end_seq)
+
     #订阅行情应答，包括股票、指数和期权
     #@param data 详细的合约订阅情况
     #@param error 订阅合约发生错误时的错误信息，当error为空，或者error.error_id为0时，表明没有错误
@@ -41,8 +49,8 @@ class TestApi(QuoteApi):
         printFuncName('onSubMarketData', data, error)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码（不包含交易所信息）例如"600000"
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订行情应答，包括股票、指数和期权
     #@param data 详细的合约取消订阅情况
@@ -54,8 +62,8 @@ class TestApi(QuoteApi):
         printFuncName('onUnSubMarketData', data, error, last)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码（不包含交易所信息）例如"600000"
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #深度行情通知，包含买一卖一队列
     #@param data 行情数据
@@ -136,15 +144,15 @@ class TestApi(QuoteApi):
         elif data['data_type_v2'] == 3: #债券
             print("data['total_bid_qty']",data['total_bid_qty'])#委托买入总量(SH,SZ)
             print("data['total_ask_qty']",data['total_ask_qty'])#委托卖出总量(SH,SZ)
-            print("data['ma_bid_price']",data['ma_bid_price'])#加权平均委买价格(SH,SZ)
-            print("data['ma_ask_price']",data['ma_ask_price'])#加权平均委卖价格(SH,SZ)
+            print("data['ma_bid_price']",data['ma_bid_price'])#加权平均委买价格(SZ)
+            print("data['ma_ask_price']",data['ma_ask_price'])#加权平均委卖价格(SZ)
             print("data['ma_bond_bid_price']",data['ma_bond_bid_price'])#债券加权平均委买价格(SH)
             print("data['ma_bond_ask_price']",data['ma_bond_ask_price'])#债券加权平均委卖价格(SH)
             print("data['yield_to_maturity']",data['yield_to_maturity'])#债券到期收益率(SH)
             print("data['match_lastpx']",data['match_lastpx'])#匹配成交最近价(SZ)
             print("data['ma_bond_price']",data['ma_bond_price'])#债券加权平均价格(SH)
-            print("data['r2']",data['r2'])#预留
-            print("data['r3']",data['r3'])#预留
+            print("data['match_qty']",data['match_qty'])#匹配成交成交量(SZ)
+            print("data['match_turnover']",data['match_turnover'])#配成交成交金额(SZ)
             print("data['r4']",data['r4'])#预留
             print("data['r5']",data['r5'])#预留
             print("data['r6']",data['r6'])#预留
@@ -164,6 +172,16 @@ class TestApi(QuoteApi):
             print("data['num_ask_orders']",data['num_ask_orders'])#卖方委托价位数(SH)
             print("data['instrument_status']",data['instrument_status'])#时段(SHL2)，L1快照数据没有此字段，具体字段说明参阅《上海新债券Level2行情说明.doc》文档
 
+    #ETF的IOPV通知
+	#@param iopv ETF的参考单位基金净值数据，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onETFIOPVData(self, data):
+        """"""
+        printFuncName('onETFIOPVData', data)
+        print("data['exchange_id']:",data['exchange_id'])#交易所代码
+        print("data['ticker']:",data['ticker'])#合约代码（不包含交易所信息），不带空格，以'\0'结尾
+        print("data['data_time']:",data['data_time'])
+        print("data['iopv']:",data['iopv'])
+    
     #订阅行情订单簿应答，包括股票、指数和期权
     #@param data 详细的合约订阅情况
     #@param error 订阅合约发生错误时的错误信息，当error为空，或者error.error_id为0时，表明没有错误
@@ -174,8 +192,8 @@ class TestApi(QuoteApi):
         printFuncName('onSubOrderBook', data, error, last)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码（不包含交易所信息）例如"600000"
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订行情订单簿应答，包括股票、指数和期权
     #@param data 详细的合约取消订阅情况
@@ -187,8 +205,8 @@ class TestApi(QuoteApi):
         printFuncName('onUnSubOrderBook', data, error, last)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码（不包含交易所信息）例如"600000"
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #行情订单簿通知，包括股票、指数和期权
     #@param data 行情订单簿数据，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
@@ -206,8 +224,6 @@ class TestApi(QuoteApi):
         print("data['bid']:",data['bid'])#十档申买价
         print("data['bid_qty']:",data['bid_qty'])#十档申买量
         print("data['ask_qty']:",data['ask_qty'])#十档申卖量
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
 
     #订阅逐笔行情应答，包括股票、指数和期权
     #@param data 详细的合约订阅情况
@@ -219,8 +235,8 @@ class TestApi(QuoteApi):
         printFuncName('onSubTickByTick', data, error, last)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订逐笔行情应答，包括股票、指数和期权
     #@param data 详细的合约取消订阅情况
@@ -232,8 +248,8 @@ class TestApi(QuoteApi):
         printFuncName('onUnSubTickByTick', data, error, last)
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #逐笔行情通知，包括股票、指数和期权
     #@param data 逐笔行情数据，包括逐笔委托和逐笔成交，此为共用结构体，需要根据type来区分是逐笔委托还是逐笔成交，需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
@@ -275,8 +291,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllMarketData(self,exchange_id, error):
         """"""
         printFuncName('onSubscribeAllMarketData', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的股票行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -285,8 +301,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllMarketData(self, exchange_id,error):
         """"""
         printFuncName('onUnSubscribeAllMarketData',exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #订阅全市场的股票行情订单簿应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -295,8 +311,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllOrderBook(self, exchange_id,error):
         """"""
         printFuncName('onSubscribeAllOrderBook', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的股票行情订单簿应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -305,8 +321,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllOrderBook(self, exchange_id,error):
         """"""
         printFuncName('onUnSubscribeAllOrderBook', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #订阅全市场的股票逐笔行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -315,8 +331,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllTickByTick(self, exchange_id,error):
         """"""
         printFuncName('onSubscribeAllTickByTick', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的股票逐笔行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -325,8 +341,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllTickByTick(self,exchange_id, error):
         """"""
         printFuncName('onUnSubscribeAllTickByTick',exchange_id, error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #查询可交易合约的应答
     #@param data 可交易合约信息
@@ -345,8 +361,9 @@ class TestApi(QuoteApi):
         print("data['price_tick']:",data['price_tick'])#最小变动价位
         print("data['buy_qty_unit']:",data['buy_qty_unit'])#合约最小交易量
         print("data['sell_qty_unit']:",data['sell_qty_unit'])#合约最小交易量
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        if('error_id' in error):
+            print("error['error_id']:",error['error_id'])
+            print("error['error_msg']:",error['error_msg'])
 
     #查询合约的最新价格信息应答
     #@param data 可交易合约信息
@@ -358,8 +375,8 @@ class TestApi(QuoteApi):
         print("data['exchange_id']:",data['exchange_id'])#交易所代码
         print("data['ticker']:",data['ticker'])#合约代码
         print("data['last_price']:",data['last_price'])#最新价
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #订阅全市场的期权行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -368,8 +385,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllOptionMarketData(self,exchange_id, error):
         """"""
         printFuncName('onSubscribeAllOptionMarketData',exchange_id, error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的期权行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -378,8 +395,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllOptionMarketData(self,exchange_id, error):
         """"""
         printFuncName('onUnSubscribeAllMarketData', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #订阅全市场的期权行情订单簿应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -388,8 +405,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllOptionOrderBook(self,exchange_id, error):
         """"""
         printFuncName('onSubscribeAllOptionOrderBook', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的期权行情订单簿应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -398,8 +415,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllOptionOrderBook(self,exchange_id, error):
         """"""
         printFuncName('onUnSubscribeAllOptionOrderBook', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #订阅全市场的期权逐笔行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -408,8 +425,8 @@ class TestApi(QuoteApi):
     def onSubscribeAllOptionTickByTick(self,exchange_id, error):
         """"""
         printFuncName('onSubscribeAllOptionTickByTick', exchange_id,error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #退订全市场的期权逐笔行情应答
     #@param exchange_id 表示当前全订阅的市场，如果为XTP_EXCHANGE_UNKNOWN(3)，表示沪深全市场，XTP_EXCHANGE_SH(1)表示为上海全市场，XTP_EXCHANGE_SZ(2)表示为深圳全市场
@@ -418,8 +435,8 @@ class TestApi(QuoteApi):
     def onUnSubscribeAllOptionTickByTick(self,exchange_id,error):
         """"""
         printFuncName('onUnSubscribeAllOptionTickByTick',exchange_id, error)
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        print("error['error_id']:",error['error_id'])
+        print("error['error_msg']:",error['error_msg'])
 
     #查询合约完整静态信息的应答
     #@param ticker_info 合约完整静态信息
@@ -455,8 +472,61 @@ class TestApi(QuoteApi):
         print("data['market_ask_qty_lower_limit']:",data['market_ask_qty_lower_limit'])#市价卖委托数量下限
         print("data['market_ask_qty_unit']:",data['market_ask_qty_unit'])#市价卖数量单位
         print("data['security_status']:",data['security_status'])#证券状态
-        print("error['error_id']):",error['error_id'])
-        print("error['error_msg']):",error['error_msg'])
+        if('error_id' in error):
+            print("error['error_id']:",error['error_id'])
+            print("error['error_msg']:",error['error_msg'])
+
+    #查询新三板合约完整静态信息的应答
+	#@param ticker_info 合约完整静态信息
+	#@param error_info 查询合约完整静态信息时发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param is_last 是否此次查询合约完整静态信息的最后一个应答，当为最后一个的时候为true，如果为false，表示还有其他后续消息响应
+    def onQueryAllNQTickersFullInfo(self, data, error, last):
+        """"""
+        printFuncName('onQueryAllNQTickersFullInfo', data, error, last)
+        print("data['exchange_id']:",data['exchange_id'])#交易所代码
+        print("data['ticker']:",data['ticker'])#证券代码
+        print("data['ticker_name']:",data['ticker_name'])#证券名称
+        print("data['security_type']:",data['security_type'])#合约详细类型
+        print("data['ticker_qualification_class']:",data['ticker_qualification_class'])#合约适当性类别
+        print("data['ticker_abbr_en']:",data['ticker_abbr_en'])#英文简称
+        print("data['base_ticker']:",data['base_ticker'])#基础证券
+        print("data['currency_type']:",data['currency_type'])#行业种类
+        print("data['security_type']:",data['security_type'])#货币种类
+        print("data['trade_unit']:",data['trade_unit'])#交易单位
+        print("data['hang_out_date']:",data['hang_out_date'])#挂牌日期
+        print("data['value_date']:",data['value_date'])#起息日期
+        print("data['maturity_date']:",data['maturity_date'])#到期日
+        print("data['per_limit_vol']:",data['per_limit_vol'])#每笔限量
+        print("data['buy_vol_unit']:",data['buy_vol_unit'])#买数量单位
+        print("data['sell_vol_unit']:",data['sell_vol_unit'])#卖数量单位
+        print("data['mini_declared_vol']:",data['mini_declared_vol'])#最小申报数量
+        print("data['limit_price_attr']:",data['limit_price_attr'])#限价参数性质
+        print("data['market_maker_quantity']:",data['market_maker_quantity'])#做市商数量
+        print("data['price_gear']:",data['price_gear'])#价格档位
+        print("data['first_limit_trans']:",data['first_limit_trans'])#首笔交易限价参数
+        print("data['subsequent_limit_trans']:",data['subsequent_limit_trans'])#后续交易限价参数
+        print("data['limit_upper_price']:",data['limit_upper_price'])#涨停价格
+        print("data['limit_lower_price']:",data['limit_lower_price'])#跌停价格
+        print("data['block_trade_upper']:",data['block_trade_upper'])#大宗交易价格上限(预留，默认0)
+        print("data['block_trade_lower']:",data['block_trade_lower'])#大宗交易价格下限(预留，默认0)
+        print("data['convert_into_ration']:",data['convert_into_ration'])#折合比例
+        print("data['trade_status']:",data['trade_status'])#交易状态
+        print("data['security_level']:",data['security_level'])#证券级别
+        print("data['trade_type']:",data['trade_type'])#交易类型
+        print("data['suspend_flag']:",data['suspend_flag'])#停牌标志
+        print("data['ex_dividend_flag']:",data['ex_dividend_flag'])#除权除息标志
+        print("data['layer_type']:",data['layer_type'])#分层信息
+        print("data['reserved1']:",data['reserved1'])#保留字段
+        print("data['trade_places']:",data['trade_places'])#交易场所 预留
+        print("data['is_rzbd']:",data['is_rzbd'])#是否融资标的 Y是 N否
+        print("data['is_rqbd']:",data['is_rqbd'])#是否融券标的 Y是 N否
+        print("data['is_drrz']:",data['is_drrz'])#是否当日可融资 Y是 N否
+        print("data['is_drrq']:",data['is_drrq'])#是否当日可融券 Y是 N否
+        print("data['reserved']:",data['reserved'])#保留字段
+        if('error_id' in error):
+            print("error['error_id']:",error['error_id'])
+            print("error['error_msg']:",error['error_msg'])
+   
         
     #当客户端与回补行情服务器通信连接断开时，该方法被调用。
     #@param reason 错误原因，请与错误代码表对应
@@ -588,15 +658,15 @@ class TestApi(QuoteApi):
         elif data['data_type_v2'] == 3: #债券
             print("data['total_bid_qty']",data['total_bid_qty'])#委托买入总量(SH,SZ)
             print("data['total_ask_qty']",data['total_ask_qty'])#委托卖出总量(SH,SZ)
-            print("data['ma_bid_price']",data['ma_bid_price'])#加权平均委买价格(SH,SZ)
-            print("data['ma_ask_price']",data['ma_ask_price'])#加权平均委卖价格(SH,SZ)
+            print("data['ma_bid_price']",data['ma_bid_price'])#加权平均委买价格(SZ)
+            print("data['ma_ask_price']",data['ma_ask_price'])#加权平均委卖价格(SZ)
             print("data['ma_bond_bid_price']",data['ma_bond_bid_price'])#债券加权平均委买价格(SH)
             print("data['ma_bond_ask_price']",data['ma_bond_ask_price'])#债券加权平均委卖价格(SH)
             print("data['yield_to_maturity']",data['yield_to_maturity'])#债券到期收益率(SH)
             print("data['match_lastpx']",data['match_lastpx'])#匹配成交最近价(SZ)
             print("data['ma_bond_price']",data['ma_bond_price'])#债券加权平均价格(SH)
-            print("data['r2']",data['r2'])#预留
-            print("data['r3']",data['r3'])#预留
+            print("data['match_qty']",data['match_qty'])#匹配成交成交量(SZ)
+            print("data['match_turnover']",data['match_turnover'])#配成交成交金额(SZ)
             print("data['r4']",data['r4'])#预留
             print("data['r5']",data['r5'])#预留
             print("data['r6']",data['r6'])#预留
@@ -626,7 +696,8 @@ if __name__ == '__main__':
     port = 6002
     user = 'username'
     password = 'password'
-    local_ip = '10.25.171.32'
+    local_ip = '10.25.61.57'
+
     #创建QuoteApi
     #@param client_id （必须输入）用于区分同一用户的不同客户端，由用户自定义
     #@param save_file_path （必须输入）存贮订阅信息文件的目录，请设定一个有可写权限的真实存在的路径
@@ -687,12 +758,15 @@ if __name__ == '__main__':
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api只能有一个连接
     retLogin = api.login(ip, port, user, password, 1,local_ip)
     printFuncName('login', retLogin)
+    if retLogin != 0 :
+       retGetApiLastError = api.getApiLastError()
+       printFuncName('getApiLastError', retGetApiLastError)   
 
     #获取API的系统错误
     #@return 返回的错误信息，可以在Login、Logout、订阅、取消订阅失败时调用，获取失败的原因
     #@remark 可以在调用api接口失败时调用，例如login失败时
-    getApiLastError = api.getApiLastError()
-    printFuncName("getApiLastError", getApiLastError)
+    #getApiLastError = api.getApiLastError()
+    #printFuncName("getApiLastError", getApiLastError)
 
     #获取API的发行版本号
     #@return 返回api发行版本号
@@ -709,7 +783,7 @@ if __name__ == '__main__':
     tickerList = [{'ticker':'000001'},{'ticker':'000002'},{'ticker':'000004'}]
     count = 3
 
-    """
+    
     #订阅行情，包括股票、指数和期权。
     #@return 订阅接口调用是否成功，“0”表示接口调用成功，非“0”表示接口调用出错
     #@param tickerList 合约ID数组 
@@ -748,7 +822,7 @@ if __name__ == '__main__':
     sleep(1)
     retUnSubscribeOrderBook = api.unSubscribeOrderBook(tickerList,count, 2)
     printFuncName('unSubscribeOrderBook', retUnSubscribeOrderBook)
-    """
+  
 
     #订阅逐笔行情，包括股票、指数和期权。
     #@return 订阅逐笔行情接口调用是否成功，“0”表示接口调用成功，非“0”表示接口调用出错
@@ -759,8 +833,7 @@ if __name__ == '__main__':
     sleep(1)
     retSubscribeTickByTick = api.subscribeTickByTick(tickerList,count, 2)
     printFuncName('subscribeTickByTick', retSubscribeTickByTick)
-    """
-
+    
     #退订逐笔行情，包括股票、指数和期权。
     #@return 取消订阅逐笔行情接口调用是否成功，“0”表示接口调用成功，非“0”表示接口调用出错
     #@param tickerList 合约ID数组 
@@ -889,7 +962,7 @@ if __name__ == '__main__':
     sleep(1)
     unSubscribeAllOptionTickByTick = api.unSubscribeAllOptionTickByTick(2)
     printFuncName('unsubscribeAllOptionTickByTick', unSubscribeAllOptionTickByTick)
-
+    
     #获取当前交易日合约的详细静态信息
     #@return 发送查询请求是否成功，“0”表示发送查询请求成功，非“0”表示发送查询请求不成功
     #@param exchange_id 交易所代码，必须提供 1-上海 2-深圳
@@ -897,13 +970,23 @@ if __name__ == '__main__':
     queryAllTickersFullInfo = api.queryAllTickersFullInfo(2)
     printFuncName('queryAllTickersFullInfo', queryAllTickersFullInfo)  
     
-    
+    #获取新三板所有合约的详细静态信息，包括指数等非可交易的
+	#@return 发送查询请求是否成功，“0”表示发送查询请求成功，非“0”表示发送查询请求不成功
+    sleep(1)
+    retQueryAllNQTickersFullInfo = api.queryAllNQTickersFullInfo()
+    printFuncName('queryAllNQTickersFullInfo', retQueryAllNQTickersFullInfo)
+    if retQueryAllNQTickersFullInfo != 0 :
+       retGetApiLastError = api.getApiLastError()
+       printFuncName('getApiLastError', retGetApiLastError)   
+
+    ########行情回补部分
     sleep(1)
     rebuild_ip = '10.25.134.104'
     rebuild_port = 6662
     newuser = 'testshopt02tgt'
     newpassword = '123456'
     local_ip = '10.25.171.32'
+	
     #用户登录回补服务器请求
     #@return 登录是否成功，“0”表示登录成功，“-1”表示连接服务器出错，此时用户可以调用GetApiLastError()来获取错误代码，“-2”表示已存在连接，不允许重复登录，如果需要重连，请先logout，“-3”表示输入有错误
     #@param ip 服务器ip地址，类似“127.0.0.1”
@@ -913,37 +996,54 @@ if __name__ == '__main__':
     #@param sock_type “1”代表TCP，“2”代表UDP
     #@param local_ip 本地网卡地址，类似“127.0.0.1”
     #@remark 此函数为同步阻塞式，不需要异步等待登录成功，当函数返回即可进行后续操作，此api只能有一个连接。回补服务器会在无消息交互后定时断线，请注意仅在需要回补数据时才保持连接，回补完成后请及时logout
-    ret = api.loginToRebuildQuoteServer(rebuild_ip,rebuild_port,newuser,newpassword,1,local_ip)
-    printFuncName('loginToRebuildQuoteServer', ret)
-    #getApiLastError = api.getApiLastError()
-    #printFuncName("getApiLastError", getApiLastError)
+    retLoginToRebuildQuoteServer = api.loginToRebuildQuoteServer(rebuild_ip,rebuild_port,newuser,newpassword,1,local_ip)
+    printFuncName('loginToRebuildQuoteServer', retLoginToRebuildQuoteServer)
+    if retLoginToRebuildQuoteServer != 0 :
+        getApiLastError = api.getApiLastError()
+        printFuncName("getApiLastError", getApiLastError)
     
     rebuild_param = {}
+    rebuild_param['request_id'] = 1
     rebuild_param['data_type'] = 1
-    rebuild_param['exchange_id'] = 1;
+    rebuild_param['exchange_id'] = 1
     rebuild_param['ticker'] = '600000'
+    #请求回补快照行情
     rebuild_param['begin'] = 20221214101000000
     rebuild_param['end'] =  20221214103000000
-
+    #请求回补逐笔行情
+    #rebuild_param['channel_number'] = 801
+    #rebuild_param['begin'] = 1000
+    #rebuild_param['end'] =  1200        
     #请求回补指定行情，包括快照和逐笔
     #@return 请求回补指定频道的逐笔行情接口调用是否成功，“0”表示接口调用成功，非“0”表示接口调用出错
     #@param rebuild_param 指定回补的参数信息，注意一次性回补最多1000个数据，超过1000需要分批次请求，一次只能指定一种类型的数据
     #@remark 仅在逐笔行情丢包时或者确实快照行情时使用，回补的行情数据将从OnRebuildTickByTick或者OnRebuildMarketData()接口回调提供，与订阅的行情数据不在同一个线程内
     rebuildquote = api.requestRebuildQuote(rebuild_param)
     printFuncName('requestRebuildQuote', rebuildquote)
-    getApiLastError = api.getApiLastError()
-    printFuncName("getApiLastError", getApiLastError)
+    if rebuildquote != 0 :
+        getApiLastError = api.getApiLastError()
+        printFuncName("getApiLastError", getApiLastError)
     
-    """
+    #登出回补服务器请求
+    #@return 登出是否成功，“0”表示登出成功，非“0”表示登出出错，此时用户可以调用GetApiLastError()来获取错误代码
+    #@remark 此函数为同步阻塞式，不需要异步等待登出，当函数返回即可进行后续操作
+    logoutRebuildQuoteServer = api.logoutFromRebuildQuoteServer()
+    printFuncName('logoutFromRebuildQuoteServer', logoutRebuildQuoteServer)
+    
     
     #sleep为了删除接口对象前将回调数据输出，不sleep直接删除回调对象会自动析构，无法返回回调的数据
     sleep(20)
     
+    #登出请求
+    #@return 登出是否成功，“0”表示登出成功，非“0”表示登出出错，此时用户可以调用GetApiLastError()来获取错误代码
+    #@remark 此函数为同步阻塞式，不需要异步等待登出，当函数返回即可进行后续操作
+    logout = api.logout()
+    printFuncName('logout:',logout )
     
     #删除接口对象本身
     #@remark 不再使用本接口对象时,调用该函数删除接口对象
-    release = api.release()
-    printFuncName('release', release)
+    #release = api.release()
+    #printFuncName('release', release)
 
     exit = api.exit()
     printFuncName('exit', exit)
