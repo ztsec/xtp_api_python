@@ -74,7 +74,7 @@ if (WIN32)
 elseif(UNIX)
 	set(Boost_USE_MULTITHREADED      ON)
 	set(BOOST_ROOT   /usr/local/boost_1_80_0/)
-	find_package(Boost 1.80.0 COMPONENTS python3.9 thread date_time system chrono REQUIRED) # 如果boost库没有完全编译，需要将编译的库明确地指出，否者message(${Boost_LIBRARIES})会出错
+	find_package(Boost 1.80.0 COMPONENTS python39 thread date_time system chrono REQUIRED) # 如果boost库没有完全编译，需要将编译的库明确地指出，否者message(${Boost_LIBRARIES})会出错
 	if(Boost_FOUND)
 		include_directories(${Boost_INCLUDE_DIRS})
 	endif()
