@@ -313,8 +313,8 @@ class TestApi(TraderApi):
         print("data['market']:",data['market'])#交易市场
         print("data['quantity']:",data['quantity'])#数量，此次成交的数量，不是累计数量
         print("data['business_type']:",data['business_type'])#业务类型
-        print("error['error_id']:",error['error_id'])
-        print("error['error_msg']:",error['error_msg'])
+        print("error['error_id']:",error['error_id'])#错误代码
+        print("error['error_msg']:",error['error_msg'])#错误信息
 
     #分页请求查询成交响应
     #@param data 查询到的一个成交回报
@@ -1463,7 +1463,6 @@ class TestApi(TraderApi):
 	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
     def onModifyAlgoOrder(self, data, error, session_id):
         """"""
-        printFuncName('onModifyAlgoOrder', 1)
         printFuncName('onModifyAlgoOrder', data, error, session_id)
         print("data['m_strategy_type']:",data['m_strategy_type'])#策略类型
         print("data['m_strategy_state']:",data['m_strategy_state'])#策略状态 0-创建中,1-已创建,2-开始执行中,3-已执行,4-停止中,5-已停止,6-销毁中,7-已销毁,8-发生错误,
@@ -1472,6 +1471,41 @@ class TestApi(TraderApi):
         print("error['error_id']:",error['error_id'])#错误信息
         print("error['error_msg']:",error['error_msg'])#错误信息
     
+    #algo业务中暂停指定策略指定证券算法单的响应
+	#@param xtp_strategy_id xtp算法单策略ID
+	#@param ticker_info 指定证券信息，可以为null，为null表示暂停指定策略中所有证券的算法单
+	#@param error_info 修改策略单发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param request_id 此消息响应函数对应的请求ID
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onPauseAlgoOrder(self, xtp_strategy_id, data, error, request_id, session_id):
+        """"""
+        printFuncName('onPauseAlgoOrder', xtp_strategy_id, data, error, request_id, session_id)
+        print("xtp_strategy_id:",xtp_strategy_id)#算法单策略ID
+        if('m_ticker' in data):
+            print("data['m_ticker']:", data['m_ticker'])#证券代码
+        if('m_market' in data):
+            print("data['m_market']:", data['m_market'])#交易市场
+        print("error['error_id']:",error['error_id'])#错误代码
+        print("error['error_msg']:",error['error_msg'])#错误信息
+		
+	#algo业务中重启指定策略指定证券算法单的响应
+	#@param xtp_strategy_id xtp算法单策略ID
+	#@param ticker_info 指定证券信息，可以为null，为null表示重启指定策略中所有证券的算法单
+	#@param error_info 修改策略单发生错误时返回的错误信息，当error_info为空，或者error_info.error_id为0时，表明没有错误
+	#@param request_id 此消息响应函数对应的请求ID
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 需要快速返回，否则会堵塞后续消息，当堵塞严重时，会触发断线
+    def onResumeAlgoOrder(self, xtp_strategy_id, data, error, request_id, session_id):
+        """"""
+        printFuncName('onResumeAlgoOrder', xtp_strategy_id, data, error, request_id, session_id)
+        print("xtp_strategy_id:",xtp_strategy_id)#算法单策略ID
+        if('m_ticker' in data):
+            print("data['m_ticker']:", data['m_ticker'])#证券代码
+        if('m_market' in data):
+            print("data['m_market']:", data['m_market'])#交易市场
+        print("error['error_id']:",error['error_id'])#错误代码
+        print("error['error_msg']:",error['error_msg'])#错误信息
 
 if __name__ == '__main__':
     ip = '122.112.139.0'
@@ -2226,9 +2260,9 @@ if __name__ == '__main__':
     #@param session_id 资金账户对应的session_id,登录时得到
     #@param request_id 用于用户定位查询响应的ID，由用户自定义
     query_other_server_fund_req = {
-        'fund_account': '',
-        'password': '',
-        'query_type': '0'
+        'fund_account': 'username',
+        'password': 'password',
+        'query_type': 1
     }
     reqid += 1
     queryOtherServerFund = api.queryOtherServerFund(query_other_server_fund_req,session_id, reqid)
@@ -2365,6 +2399,45 @@ if __name__ == '__main__':
     if modifyAlgoOrder != 0 :
         retGetApiLastError = api.getApiLastError()
         printFuncName('getApiLastError', retGetApiLastError)  
+
+    sleep(1)
+    #algo业务中暂停指定策略中指定证券的算法单请求
+	#@return 请求发送是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param xtp_strategy_id xtp算法单策略ID
+	#@param ticker_info 指定证券信息，可以为null，为null表示暂停指定策略中所有证券的算法单
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@param request_id 用于用户定位查询响应的ID，由用户自定义
+	#@remark 仅能在用户建立算法通道后使用，此功能上线时间视服务器后台支持情况而定，具体以运营通知时间为准
+    reqid += 1
+    xtp_strategy_id = 21894080577537
+    pause_ticker_info = {}
+    pause_ticker_info['m_ticker'] = '002304'  # 洋河股份
+    pause_ticker_info['m_market'] = 1  # 深圳A股
+    pauseAlgoOrder = api.pauseAlgoOrder(xtp_strategy_id, pause_ticker_info, session_id, reqid)
+    printFuncName('pauseAlgoOrder', pauseAlgoOrder)
+    if pauseAlgoOrder != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError) 
+    
+    sleep(2)
+	#algo业务中重启指定策略中指定证券的算法单请求
+	#@return 请求发送是否成功，“0”表示成功，非“0”表示出错，此时用户可以调用GetApiLastError()来获取错误代码
+	#@param xtp_strategy_id xtp算法单策略ID
+	#@param ticker_info 指定证券信息，可以为null，为null表示重启指定策略中所有证券的算法单
+	#@param session_id 资金账户对应的session_id,登录时得到
+	#@param request_id 用于用户定位查询响应的ID，由用户自定义
+	#@remark 仅能在用户建立算法通道后使用，此功能上线时间视服务器后台支持情况而定，具体以运营通知时间为准
+    reqid += 1
+    xtp_strategy_id = 21894080577537
+    resume_ticker_info = {}
+    resume_ticker_info['m_ticker'] = '002304'   # 洋河股份
+    resume_ticker_info['m_market'] = 1  # 深圳A股
+    resumeAlgoOrder = api.resumeAlgoOrder(xtp_strategy_id, resume_ticker_info, session_id, reqid)
+    printFuncName('resumeAlgoOrder', resumeAlgoOrder)
+    if resumeAlgoOrder != 0 :
+        retGetApiLastError = api.getApiLastError()
+        printFuncName('getApiLastError', retGetApiLastError)  
+    
    
     #sleep为了删除接口对象前将回调数据输出，不sleep直接删除回调对象会自动析构，无法返回回调的数据
     sleep(5)
