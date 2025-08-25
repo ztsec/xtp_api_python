@@ -74,6 +74,8 @@ if (WIN32)
 elseif(UNIX)
 	set(Boost_USE_MULTITHREADED      ON)
 	set(BOOST_ROOT   /usr/local/boost_1_80_0/)
+    set(Boost_NO_SYSTEM_PATHS        ON)  # 禁止搜索系统路径
+    set(Boost_NO_BOOST_CMAKE         ON)  # 使用传统的FindBoost模块
 	find_package(Boost 1.80.0 COMPONENTS python39 thread date_time system chrono REQUIRED) # 如果boost库没有完全编译，需要将编译的库明确地指出，否者message(${Boost_LIBRARIES})会出错
 	if(Boost_FOUND)
 		include_directories(${Boost_INCLUDE_DIRS})
