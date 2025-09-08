@@ -455,6 +455,7 @@ class TestApi(QuoteApi):
         print("data['is_noprofit']:",data['is_noprofit'])#是否尚未盈利(仅适用创业板股票，创新企业股票及存托凭证)
         print("data['is_weighted_voting_rights']:",data['is_weighted_voting_rights'])#是否存在投票权差异(仅适用创业板股票，创新企业股票及存托凭证)
         print("data['is_have_price_limit']:",data['is_have_price_limit'])#是否有涨跌幅限制(注：不提供具体幅度，可通过涨跌停价和昨收价来计算幅度)
+        print("data['is_inventory']:",data['is_inventory'])#是否为存量科创板股票（即2025.07.13日前上市的）。1=是；0=否；(注：暂时不启用，待交易所对科创板成长层股票新增特殊标识后启用，启用前该字段无意义)
         print("data['upper_limit_price']:",data['upper_limit_price'])#涨停价（仅在有涨跌幅限制时有效）
         print("data['lower_limit_price']:",data['lower_limit_price'])#跌停价（仅在有涨跌幅限制时有效）
         print("data['pre_close_price']:",data['pre_close_price'])#昨收价

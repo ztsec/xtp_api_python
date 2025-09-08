@@ -83,6 +83,14 @@ class TestApi(TraderApi):
         print("error['error_id']:",error['error_id'])#
         print("error['error_msg']:",error['error_msg'])#
 
+    #报单未知状态通知
+	#@param order_xtp_id 未知状态订单的order_xtp_id
+	#@param session_id 资金账户对应的session_id，登录时得到
+	#@remark 此响应仅表明交易服务器丢失订单，并没有报送到交易所。如果收到此响应，可以在本地订单缓存中查找到对应的订单进行标注
+    def onUnknownOrder(order_xtp_id, session_id):
+        """"""
+        printFuncName('onUnknownOrder', order_xtp_id, session_id)
+
     #成交通知
     #@param data 成交回报的具体信息，用户可以通过data.order_xtp_id来管理订单，通过GetClientIDByXTPID() == client_id来过滤自己的订单。对于上交所，exec_id可以唯一标识一笔成交。当发现2笔成交回报拥有相同的exec_id，则可以认为此笔交易自成交了。对于深交所，exec_id是唯一的，暂时无此判断机制。report_index+market字段可以组成唯一标识表示成交回报。
     #@param session_id 资金账户对应的session，登录时得到
@@ -1508,6 +1516,7 @@ class TestApi(TraderApi):
         print("error['error_msg']:",error['error_msg'])#错误信息
 
 if __name__ == '__main__':
+
     ip = '122.112.139.0'
     port = 6202
     user = 'username'
@@ -1548,6 +1557,12 @@ if __name__ == '__main__':
 	#@param interval 心跳检测时间间隔，单位为秒
 	#@remark 此函数必须在Login之前调用
     setHeartBeatInterval = api.setHeartBeatInterval(15)   
+
+    #设置单个用户当日报单总量的最大值
+	#@return true表示设置成功，false表示设置失败;若设置失败则采用默认值；
+	#@param max_order_qty 当日报单总量的最大值，范围：0~(1024*1024*32-1000)
+	#@remark 此函数为设置该Api内部单个账户的缓存订单总量，该缓存非动态增减，必须在Login之前调用；若不调用则默认最大值为1024*200；实际报单总量若大于预设值，报单则报错
+    retSetMaxOrderQty = api.setMaxOrderBufferQuantity(512000);
 
     #用户登录请求
     #@return session表明此资金账号登录是否成功，“0”表示登录失败，可以调用GetApiLastError()来获取错误代码，非“0”表示登录成功，此时需要记录下这个返回值session，与登录的资金账户对应
