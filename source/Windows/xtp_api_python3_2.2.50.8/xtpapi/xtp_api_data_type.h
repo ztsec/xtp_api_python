@@ -123,8 +123,8 @@ typedef enum XTP_PRICE_TYPE
 	XTP_PRICE_BEST5_OR_LIMIT,      ///<最优五档即时成交剩余转限价，市价单-沪
 	XTP_PRICE_BEST5_OR_CANCEL,     ///<最优5档即时成交剩余转撤销，市价单-沪深 / 深期权
 	XTP_PRICE_ALL_OR_CANCEL,       ///<全部成交或撤销,市价单-深 / 沪期权 / 深期权
-	XTP_PRICE_FORWARD_BEST,        ///<本方最优，市价单-深 / 深期权 / 沪科创板
-	XTP_PRICE_REVERSE_BEST_LIMIT,  ///<对方最优剩余转限价，市价单-深 / 沪期权 / 深期权 / 沪科创板
+	XTP_PRICE_FORWARD_BEST,        ///<本方最优，市价单-沪深 / 深期权
+	XTP_PRICE_REVERSE_BEST_LIMIT,  ///<对方最优，市价单-沪深 / 沪期权 / 深期权
 	XTP_PRICE_LIMIT_OR_CANCEL,	   ///<期权限价申报FOK
 	XTP_PRICE_TYPE_UNKNOWN,		   ///<未知或者无效价格类型
 }XTP_PRICE_TYPE;

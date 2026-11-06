@@ -2883,7 +2883,7 @@ void TraderApi::processQueryCreditFundInfo(Task *task) {
 		data["all_debt"] = task_data->all_debt;
 		data["line_of_credit"] = task_data->line_of_credit;
 		data["guaranty"] = task_data->guaranty;
-		data["reserved"] = task_data->reserved;
+		data["real_maintenance_ratio"] = task_data->real_maintenance_ratio;
 		delete task->task_data;
 	}
 

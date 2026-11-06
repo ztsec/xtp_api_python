@@ -2,7 +2,7 @@
 
 本项目是中泰证券XTP极速交易PYTHON接口的开源实现，供客户在量化交易中使用PYTHON接口快速接入XTP系统。中泰证券XTP是为股票交易而生的极速交易系统，为投资者提供极速交易、极速行情、Level2行情。
 
-目前xtp系统最新的api版本为2.2.50.8，支持windows、linux平台运行。
+目前xtp系统最新的api版本为2.2.51.1，支持windows、linux平台运行。
 
 请先到中泰证券xtp官方网站申请测试账号 https://xtp.zts.com.cn 及测试环境的连接ip、端口等信息。
 

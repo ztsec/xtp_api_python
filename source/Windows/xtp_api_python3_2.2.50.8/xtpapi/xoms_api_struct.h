@@ -1007,7 +1007,7 @@ typedef struct XTPCrdFundInfo
     double all_debt;                ///< 总负债
     double line_of_credit;          ///< 两融授信额度
     double guaranty;                ///< 两融保证金可用数
-    double reserved;                ///< 保留字段
+    double real_maintenance_ratio;  ///< 实时维保比例(带预估负债)
 }XTPCrdFundInfo;
 
 //////////////////////////////////////////////////////////////////////////
