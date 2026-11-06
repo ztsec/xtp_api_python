@@ -730,7 +730,7 @@ class TestApi(TraderApi):
         print("data['all_debt']:",data['all_debt'])#总负债
         print("data['line_of_credit']:",data['line_of_credit'])#两融授信额度
         print("data['guaranty']:",data['guaranty'])#两融保证金可用数
-        print("data['real_maintenance_ratio']:",data['real_maintenance_ratio'])#保留字段
+        print("data['real_maintenance_ratio']:",data['real_maintenance_ratio'])#实时维保比例(带预估负债)
         print("error['error_id']:",error['error_id'])
         print("error['error_msg']:",error['error_msg'])
 
