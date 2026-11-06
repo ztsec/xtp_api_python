@@ -20,7 +20,7 @@ python版本api封装使用的Visual Studio 2015，如果本地安装的vs是较
 
 3.如果客户需要按自己的python版本编译封装库，可以使用source目录下的代码，根据自己的python的版本，及该python版本对应的编译后的boost库，自行编译所需的python封装库。（具体过程在doc文件夹下有编译过程文档，source文件夹下有源码，包括Linux和Windows下编译的python3封装库)。
 
-4.XTP_API_20250806_2.2.50.8文件夹下存放最新的xtp系统的api，当前python封装库分别包含行情和交易库，python封装后的接口与当前xtp系统api的所有接口都保持一致，只有方法名有所区别，python封装后的接口方法名首字母小写，而xtp系统api的方法名首字母大写。
+4.XTP_API_20250806_2.2.51.1文件夹下存放最新的xtp系统的api，是C++语言版本的sdk，python版本的封装库就是基于C++语言版本的接口进行封装生成的python版本的库文件。source目录是封装的源代码。当前python封装库分别包含行情和交易库，python封装后的接口与当前xtp系统api的所有接口都保持一致，只有方法名有所区别，python封装后的接口方法名首字母小写，而xtp系统api的方法名首字母大写。
 
   因此所有封装后的python接口方法使用和功能都可以参见xtp系统api的接口方法。请在xtp_quote_api.h、xtp_trader_api.h两个头文件中了解各个接口的使用及功能。
 
