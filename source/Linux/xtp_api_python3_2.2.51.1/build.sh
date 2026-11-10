@@ -9,6 +9,6 @@ fi
 pushd $BUILDDIR
 cmake ..
 make VERBOSE=1 -j 1
-cp `pwd`/lib/vnxtpquote.so ../
+cp `pwd`/lib/vnxtpxquote.so ../
 cp `pwd`/lib/vnxtptrader.so ../
 popd
